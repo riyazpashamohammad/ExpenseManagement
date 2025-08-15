@@ -1,101 +1,90 @@
 // src/screens/Report.tsx
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ScrollView } from 'react-native';
-import { collection, getDocs } from 'firebase/firestore';
-import { db, auth } from '../services/firebase';
-import { format, parseISO } from 'date-fns';
-import { VictoryBar, VictoryChart, VictoryTheme } from 'victory';
+import React from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, Image } from 'react-native';
+// Placeholder for cute icon, replace with your own K-drama themed image
+import CuteDemon from '../../assets/kdrama/cute-demon.png';
+import { VictoryBar, VictoryChart, VictoryTheme, VictoryPie } from 'victory';
+import { useExpenseReport } from '../hooks/useExpenseReport';
 
-type Expense = {
-  amount: number;
-  date: string;
-  description: string;
-  category: string;
-};
 
-export default function Report() {
-  const [daily, setDaily] = useState<Record<string, number>>({});
-  const [monthly, setMonthly] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchExpenses = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const ref = collection(db, 'expenses', user.uid, 'entries');
-        const snapshot = await getDocs(ref);
-
-        const dailyTotals: Record<string, number> = {};
-        const monthlyTotals: Record<string, number> = {};
-
-        snapshot.forEach((doc) => {
-          const data = doc.data() as Expense;
-          const date = new Date(data.date);
-          const dayKey = format(date, 'yyyy-MM-dd');
-          const monthKey = format(date, 'yyyy-MM');
-
-          dailyTotals[dayKey] = (dailyTotals[dayKey] || 0) + data.amount;
-          monthlyTotals[monthKey] = (monthlyTotals[monthKey] || 0) + data.amount;
-        });
-
-        setDaily(dailyTotals);
-        setMonthly(monthlyTotals);
-      } catch (error) {
-        console.error('Error fetching expenses:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchExpenses();
-  }, []);
+export default function ReportScreen() {
+  const { daily, monthly, yearly, category, loading, error } = useExpenseReport();
 
   if (loading) {
     return (
       <View style={styles.center}>
-        <Text>Loading reports...</Text>
+        <Image source={CuteDemon} style={styles.cuteImage} />
+        <ActivityIndicator size="large" color="#b983ff" />
+        <Text style={{ marginTop: 12, color: '#b983ff', fontWeight: 'bold' }}>Loading reports...</Text>
+      </View>
+    );
+  }
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Image source={CuteDemon} style={styles.cuteImage} />
+        <Text style={{ color: '#ff6f91', fontWeight: 'bold' }}>{error}</Text>
       </View>
     );
   }
 
-  const monthlyChartData = Object.entries(monthly).map(([month, total]) => ({
-    x: month,
-    y: total
-  }));
+  const monthlyChartData = Object.entries(monthly).map(([month, total]) => ({ x: month, y: total }));
+  const yearlyChartData = Object.entries(yearly).map(([year, total]) => ({ x: year, y: total }));
+  const categoryChartData = Object.entries(category).map(([cat, total]) => ({ x: cat, y: total }));
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>📅 Daily Expense Report</Text>
-      <FlatList
-        data={Object.entries(daily)}
-        keyExtractor={(item) => item[0]}
-        renderItem={({ item }) => (
-          <Text style={styles.item}>
-            {item[0]}: ₹{item[1].toFixed(2)}
-          </Text>
-        )}
-      />
-
-      <Text style={styles.header}>📆 Monthly Summary</Text>
-      <FlatList
-        data={Object.entries(monthly)}
-        keyExtractor={(item) => item[0]}
-        renderItem={({ item }) => (
-          <Text style={styles.item}>
-            {item[0]}: ₹{item[1].toFixed(2)}
-          </Text>
-        )}
-      />
-
-      <Text style={styles.header}>📊 Monthly Chart</Text>
-      <VictoryChart theme={VictoryTheme.material} domainPadding={20}>
-        <VictoryBar
-          data={monthlyChartData}
-          style={{ data: { fill: '#4CAF50' } }}
+    <ScrollView style={styles.container} contentContainerStyle={{ alignItems: 'center', paddingBottom: 32 }}>
+      <Image source={CuteDemon} style={styles.cuteImage} />
+      <Text style={styles.title}>Expense Report</Text>
+      <View key="daily" style={styles.sectionCard}>
+        <Text style={styles.header}>📅 Daily Expense Report</Text>
+        <FlatList
+          data={Object.entries(daily)}
+          keyExtractor={(item) => item[0]}
+          renderItem={({ item }) => (
+            <Text style={styles.item}>{item[0]}: ₩{item[1].toFixed(2)}</Text>
+          )}
+          style={styles.list}
+          scrollEnabled={false}
         />
-      </VictoryChart>
+      </View>
+      <View key="monthly" style={styles.sectionCard}>
+        <Text style={styles.header}>📆 Monthly Summary</Text>
+        <FlatList
+          data={Object.entries(monthly)}
+          keyExtractor={(item) => item[0]}
+          renderItem={({ item }) => (
+            <Text style={styles.item}>{item[0]}: ₩{item[1].toFixed(2)}</Text>
+          )}
+          style={styles.list}
+          scrollEnabled={false}
+        />
+      </View>
+      <View key="yearly" style={styles.sectionCard}>
+        <Text style={styles.header}>📅 Yearly Summary</Text>
+        <FlatList
+          data={Object.entries(yearly)}
+          keyExtractor={(item) => item[0]}
+          renderItem={({ item }) => (
+            <Text style={styles.item}>{item[0]}: ₩{item[1].toFixed(2)}</Text>
+          )}
+          style={styles.list}
+          scrollEnabled={false}
+        />
+      </View>
+      <View key="category" style={styles.sectionCard}>
+        <Text style={styles.header}>📂 Category-wise Summary</Text>
+        <FlatList
+          data={Object.entries(category)}
+          keyExtractor={(item) => item[0]}
+          renderItem={({ item }) => (
+            <Text style={styles.item}>🌸 {item[0]}: ₩{item[1].toFixed(2)}</Text>
+          )}
+          style={styles.list}
+          scrollEnabled={false}
+        />
+      </View>
     </ScrollView>
   );
 }
@@ -103,21 +92,82 @@ export default function Report() {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: '#fff'
+    backgroundColor: '#fbeaff', // pastel purple-pink
+    flex: 1,
+  },
+  cuteImage: {
+    width: 120,
+    height: 120,
+    resizeMode: 'contain',
+    marginTop: 12,
+    marginBottom: 8,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: '#b983ff',
+    backgroundColor: '#fff0f6',
+    shadowColor: '#b983ff',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+    alignSelf: 'center',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#b983ff',
+    marginBottom: 16,
+    marginTop: 8,
+    textShadowColor: '#f3c4fb',
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 4,
+    alignSelf: 'center',
+  },
+  sectionCard: {
+    backgroundColor: '#fff0f6',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 18,
+    width: '95%',
+    shadowColor: '#b983ff',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 2,
+    borderColor: '#f3c4fb',
+    alignSelf: 'center',
   },
   header: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginTop: 24,
-    marginBottom: 8
+    marginTop: 8,
+    marginBottom: 8,
+    color: '#b983ff',
+    alignSelf: 'center',
   },
   item: {
     fontSize: 16,
-    marginVertical: 4
+    marginVertical: 4,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 12,
+    elevation: 2,
+    marginHorizontal: 8,
+    color: '#6d597a',
+    fontWeight: 'bold',
+    shadowColor: '#b983ff',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  list: {
+    marginBottom: 12,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
-  }
+    alignItems: 'center',
+    backgroundColor: '#fbeaff',
+  },
 });
