@@ -12,6 +12,7 @@ export const myDemonTheme = {
     cuteDemon: require('../../assets/mydemon/cute-demon.png'),
     heart: require('../../assets/mydemon/heart.png'),
     star: require('../../assets/mydemon/star.png'),
+    background: require('../../assets/mydemon/background.png')
   },
   sounds: {
     nav: require('../../assets/mydemon/nav.mp3'),

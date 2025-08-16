@@ -1,6 +1,7 @@
 // src/screens/DashboardScreen.tsx
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet, Image, ImageBackground } from 'react-native';
+import { Platform, Dimensions } from 'react-native';
 import { Card, Button, Text } from 'react-native-paper';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -9,61 +10,70 @@ import { useTheme } from '../theme/ThemeContext';
 export default function DashboardScreen({ navigation }: any) {
   const theme = useTheme();
   const { logout, appUser } = useAuth();
+  const { width, height } = Dimensions.get('window');
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}> 
-      <Image source={theme.images.cuteDemon} style={styles.cuteImage} />
-      <Text variant="titleLarge" style={[styles.title, { color: theme.colors.primary }]}>Expense Dashboard</Text>
-      <Card style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}> 
-        <Card.Content>
-          <Text variant='bodyMedium' style={[styles.paragraph, { color: theme.colors.text }]}>SweetHeart! Expenses dekhke karo 💸</Text>
-        </Card.Content>
-      </Card>
-      <Button
-        mode="contained"
-        icon="plus"
-        style={[styles.button, { backgroundColor: theme.colors.primary, borderRadius: 16 }]}
-        onPress={() => navigation.navigate('AddExpense')}
-      >
-        Add Expense
-      </Button>
-      <Button
-        mode="contained"
-        icon="chart-bar"
-        style={[styles.button, { backgroundColor: theme.colors.accent, borderRadius: 16 }]}
-        onPress={() => navigation.navigate('Report')}
-      >
-        View Report
-      </Button>
-      {appUser?.role === 'admin' && (
+    <ImageBackground
+      source={theme.images.background}
+      style={{ width, height }}
+      resizeMode="stretch"
+    >
+  <View style={[styles.container, { backgroundColor: 'transparent' }]}> 
+        <Image source={theme.images.cuteDemon} style={styles.cuteImage} />
+        <Text variant="titleLarge" style={[styles.title, { color: theme.colors.primary }]}>Expense Dashboard</Text>
+        <Card style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}> 
+          <Card.Content>
+            <Text variant='bodyMedium' style={[styles.paragraph, { color: theme.colors.text }]}>SweetHeart! Expenses dekhke karo 💸</Text>
+          </Card.Content>
+        </Card>
         <Button
           mode="contained"
-          icon="account"
+          icon="plus"
           style={[styles.button, { backgroundColor: theme.colors.primary, borderRadius: 16 }]}
-          onPress={() => navigation.navigate('UserManagement')}
+          onPress={() => navigation.navigate('AddExpense')}
         >
-          Manage Users
+          Add Expense
         </Button>
-      )}
-      <Button
-        mode="outlined"
-        style={[styles.button, { borderColor: theme.colors.primary, marginTop: 16 }]}
-        onPress={async () => {
-          await logout();
-          navigation.replace('Login');
-        }}
-      >
-        Logout
-      </Button>
-    </View>
+        <Button
+          mode="contained"
+          icon="chart-bar"
+          style={[styles.button, { backgroundColor: theme.colors.accent, borderRadius: 16 }]}
+          onPress={() => navigation.navigate('Report')}
+        >
+          View Report
+        </Button>
+        {appUser?.role === 'admin' && (
+          <Button
+            mode="contained"
+            icon="account"
+            style={[styles.button, { backgroundColor: theme.colors.primary, borderRadius: 16 }]}
+            onPress={() => navigation.navigate('UserManagement')}
+          >
+            Manage Users
+          </Button>
+        )}
+        <Button
+          mode="outlined"
+          style={[styles.button, { borderColor: theme.colors.primary, marginTop: 16 }]}
+          onPress={async () => {
+            await logout();
+            navigation.replace('Login');
+          } }
+        >
+          Logout
+        </Button>
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
+    backgroundColor: 'transparent',
+    paddingTop: 60, 
+    paddingBottom: 48
   },
   cuteImage: {
     width: 100,
