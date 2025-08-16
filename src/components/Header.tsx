@@ -15,6 +15,11 @@ const Header: React.FC<HeaderProps> = ({ title, navigation, routeName }) => {
   const { logout, appUser } = useAuth();
   const { unreadCount } = useNotification();
 
+  const handleLogout = async () => {
+    await logout();
+    if (navigation) navigation.replace('Login');
+  };
+
   return (
     <View style={styles.header}>
       {/* Home button on the left */}
@@ -22,7 +27,13 @@ const Header: React.FC<HeaderProps> = ({ title, navigation, routeName }) => {
         <IconButton
           icon="home"
           size={24}
-          onPress={() => navigation.navigate('Dashboard')}
+          onPress={() => {
+            if (!appUser) {
+              navigation.replace('Login');
+            } else {
+              navigation.navigate('Dashboard');
+            }
+          }}
           style={styles.homeButtonLeft}
           accessibilityLabel="Go to Dashboard"
         />
@@ -39,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({ title, navigation, routeName }) => {
       <IconButton
         icon="logout"
         size={24}
-        onPress={logout}
+        onPress={handleLogout}
         style={styles.logoutButton}
         accessibilityLabel="Logout"
       />

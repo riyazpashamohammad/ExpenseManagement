@@ -15,11 +15,13 @@ export interface Notification {
   message: string;
   read: boolean;
   createdAt: number;
+  createdBy: string; // user id
+  groupIds?: string[]; // group ids this notification is for
 }
 
 interface NotificationContextType {
   notifications: Notification[];
-  addNotification: (message: string) => void;
+  addNotification: (message: string, createdBy: string, groupIds?: string[]) => void;
   markAllAsRead: () => void;
   markAsRead: (id: string) => void;
   unreadCount: number;
@@ -29,21 +31,44 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userGroupIds, setUserGroupIds] = useState<string[]>([]);
 
-  // Load notifications from Firestore on mount
+  // Get user info from localStorage (set by AuthContext)
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userStr = localStorage.getItem('authUser');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setUserId(user.uid);
+        // Fetch groupIds from users collection
+        const userDoc = await getDocs(query(collection(db, 'users')));
+        const userData = userDoc.docs.map(d => d.data()).find(u => u.id === user.uid);
+        setUserGroupIds(userData?.groupIds || []);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // Load notifications from Firestore on mount and filter for user
   useEffect(() => {
     const fetchNotifications = async () => {
       const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
       const notifs: Notification[] = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as Notification));
-      setNotifications(notifs);
+      // Only show notifications created by user or for user's groups
+      const filtered = notifs.filter(n =>
+        n.createdBy === userId ||
+        (n.groupIds && n.groupIds.some(gid => userGroupIds.includes(gid)))
+      );
+      setNotifications(filtered);
     };
-    fetchNotifications();
-  }, []);
+    if (userId) fetchNotifications();
+  }, [userId, userGroupIds]);
 
   // Add notification to Firestore
-  const addNotification = async (message: string) => {
-    const notif = { message, read: false, createdAt: Date.now() };
+  const addNotification = async (message: string, createdBy: string, groupIds?: string[]) => {
+    const notif = { message, read: false, createdAt: Date.now(), createdBy, groupIds };
     const docRef = await addDoc(collection(db, 'notifications'), notif);
     setNotifications((prev) => [
       { id: docRef.id, ...notif },
@@ -76,7 +101,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       {children}
     </NotificationContext.Provider>
   );
-};
+}
 
 export const useNotification = () => {
   const ctx = useContext(NotificationContext);

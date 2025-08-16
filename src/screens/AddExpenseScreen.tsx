@@ -59,8 +59,12 @@ export default function AddExpenseScreen({ navigation }: any) {
       setShowSuccess(true);
       const now = new Date();
       const timeString = now.toLocaleString();
-  const user = appUser?.firstName || appUser?.email || 'Unknown user';
-  addNotification(`${user} added expense "${pendingNotif}" at ${timeString}`);
+      const user = appUser?.firstName || appUser?.email || 'Unknown user';
+      addNotification(
+        `${user} added expense "${pendingNotif}" at ${timeString}`,
+        appUser?.id || '',
+        appUser?.groupIds || []
+      );
       setTimeout(() => {
         setShowSuccess(false);
         navigation.goBack();
