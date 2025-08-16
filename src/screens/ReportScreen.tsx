@@ -2,7 +2,6 @@
 import React,{ useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { ScreenBackground } from '../components/ScreenBackground';
-import Header from '../components/Header';
 import { commonStyles } from '../theme/commonStyles';
 import CuteDemon from '../../assets/mydemon/cute-demon.png';
 import { useExpenseReport } from '../hooks/useExpenseReport';
@@ -63,7 +62,6 @@ export default function ReportScreen() {
 
   return (
     <ScreenBackground style={{ paddingHorizontal: 0 }}>
-      <Header />
       <ScrollView style={{ width: '100%' }} contentContainerStyle={{ alignItems: 'center', paddingBottom: 32 }}>
         <Image source={CuteDemon} style={commonStyles.cuteImage} />
         <Text style={[commonStyles.title, { color: '#b983ff' }]}>Expense Report</Text>

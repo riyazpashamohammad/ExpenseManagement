@@ -9,6 +9,7 @@ import AddExpenseScreen from '../screens/AddExpenseScreen';
 import ReportScreen from '../screens/ReportScreen';
 import UserManagementScreen from '../screens/UserManagementScreen';
 import Header from '../components/Header';
+import NotificationsScreen from '../screens/NotificationsScreen';
 
 
 
@@ -17,7 +18,8 @@ const Stack = createNativeStackNavigator();
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+  <Stack.Navigator initialRouteName="Login">
+  <Stack.Screen name="Notifications" component={NotificationsScreen} options={({ navigation, route }) => ({ header: () => <Header navigation={navigation} routeName={route.name} /> })} />
         <Stack.Screen name="Login" component={LoginScreen} options={({ navigation, route }) => ({ header: () => <Header navigation={navigation} routeName={route.name} /> })} />
         <Stack.Screen name="Dashboard" component={DashboardScreen} options={({ navigation, route }) => ({ header: () => <Header navigation={navigation} routeName={route.name} /> })} />
         <Stack.Screen name="AddExpense" component={AddExpenseScreen} options={({ navigation, route }) => ({ header: () => <Header navigation={navigation} routeName={route.name} /> })} />

@@ -3,7 +3,6 @@ import React from 'react';
 import { View, StyleSheet, Image, ImageBackground } from 'react-native';
 import { Platform, Dimensions } from 'react-native';
 import { Card, Button, Text } from 'react-native-paper';
-import Header from '../components/Header';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -18,7 +17,6 @@ export default function DashboardScreen({ navigation }: any) {
       style={{ width, height }}
       resizeMode="stretch"
     >
-      <Header />
       <View style={[styles.container, { backgroundColor: 'transparent' }]}> 
         <Image source={theme.images.cuteDemon} style={styles.cuteImage} />
         <Text variant="titleLarge" style={[styles.title, { color: theme.colors.primary }]}>Expense Dashboard</Text>

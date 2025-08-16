@@ -33,10 +33,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const userRef = doc(db, 'users', firebaseUser.uid);
         let userSnap = await getDoc(userRef);
         if (!userSnap.exists()) {
-          // Default role: user, no groups
+          // Prompt for first name on first login
+          let firstName = '';
+          if (firebaseUser.displayName) {
+            firstName = firebaseUser.displayName.split(' ')[0];
+          } else {
+            // eslint-disable-next-line no-alert
+            firstName = prompt('Enter your first name:') || '';
+          }
           const newUser: AppUser = {
             id: firebaseUser.uid,
             email: firebaseUser.email || '',
+            firstName,
             role: 'user',
             groupIds: [],
           };

@@ -9,6 +9,7 @@ export interface Group {
 export interface AppUser {
   id: string;
   email: string;
+  firstName?: string;
   role: UserRole;
   groupIds: string[];
 }

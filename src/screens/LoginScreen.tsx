@@ -6,7 +6,6 @@ import { Image } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import { useTheme } from '../theme/ThemeContext';
 import { ScreenBackground } from '../components/ScreenBackground';
-import Header from '../components/Header';
 import { commonStyles } from '../theme/commonStyles';
 import { auth } from '../services/firebase';
 
@@ -44,7 +43,6 @@ export default function LoginScreen({ navigation }: any) {
 
   return (
     <ScreenBackground>
-      <Header />
       <Image source={theme.images.cuteDemon} style={commonStyles.cuteImage} />
       <Text variant="titleLarge" style={[commonStyles.title, { color: theme.colors.primary }]}>Login</Text>
       <TextInput label="Email" value={email} onChangeText={setEmail} style={commonStyles.input} mode="outlined" />

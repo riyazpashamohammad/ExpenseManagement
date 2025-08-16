@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, View, StyleSheet } from 'react-native';
 import { ScreenBackground } from '../components/ScreenBackground';
-import Header from '../components/Header';
 import { commonStyles } from '../theme/commonStyles';
 import { Text, Button, Card, TextInput, Title } from 'react-native-paper';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
@@ -35,7 +34,6 @@ export default function UserManagementScreen() {
 
   return (
     <ScreenBackground>
-      <Header />
       <Title>User Management</Title>
       <TextInput
         label="Search by email"

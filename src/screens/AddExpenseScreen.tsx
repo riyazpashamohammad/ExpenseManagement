@@ -1,7 +1,9 @@
+import { useNotification } from '../context/NotificationContext';
+import { useAuth } from '../context/AuthContext';
 // src/screens/AddExpenseScreen.tsx
 import React from 'react';
-import { ActivityIndicator, Image, View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { TextInput, Button, Snackbar, Title, HelperText } from 'react-native-paper';
+import { ActivityIndicator, Image, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { TextInput, Button, Snackbar, Text, HelperText } from 'react-native-paper';
 import { useAddExpense } from '../hooks/useAddExpense';
 import { Picker } from '@react-native-picker/picker';
 import { useTheme } from '../theme/ThemeContext';
@@ -10,6 +12,7 @@ import { ScreenBackground } from '../components/ScreenBackground';
 import { commonStyles } from '../theme/commonStyles';
 
 export default function AddExpenseScreen({ navigation }: any) {
+  const { appUser } = useAuth();
   const {
     title,
     setTitle,
@@ -42,13 +45,27 @@ export default function AddExpenseScreen({ navigation }: any) {
   const [showError, setShowError] = React.useState(false);
   const theme = useTheme();
 
+  const { addNotification } = useNotification();
+  // Store the title at the time of save
+  const [pendingNotif, setPendingNotif] = React.useState<string | null>(null);
+
+  const handleSaveExpense = async () => {
+    setPendingNotif(title);
+    await saveExpense({ mood: selectedMood });
+  };
+
   React.useEffect(() => {
-    if (success) {
+    if (success && pendingNotif) {
       setShowSuccess(true);
+      const now = new Date();
+      const timeString = now.toLocaleString();
+  const user = appUser?.firstName || appUser?.email || 'Unknown user';
+  addNotification(`${user} added expense "${pendingNotif}" at ${timeString}`);
       setTimeout(() => {
         setShowSuccess(false);
         navigation.goBack();
       }, 1200);
+      setPendingNotif(null);
     }
     if (error) setShowError(true);
   }, [success, error]);
@@ -56,7 +73,7 @@ export default function AddExpenseScreen({ navigation }: any) {
     <ScreenBackground>
       <View style={styles.mainContent}>
         <Image source={theme.images.cuteDemon} style={commonStyles.cuteImage} />
-        <Title style={[commonStyles.title, { color: theme.colors.primary }]}>Add Expense</Title>
+        <Text variant="titleLarge" style={[commonStyles.title, { color: theme.colors.primary }]}>Add Expense</Text>
         {/* Mood Emoji Row */}
         <View style={styles.moodRow}>
           {moodEmojis.map((mood) => (
@@ -139,7 +156,7 @@ export default function AddExpenseScreen({ navigation }: any) {
         <HelperText type="info">Enter the expense details above.</HelperText>
         <Button
           mode="contained"
-          onPress={() => saveExpense({ mood: selectedMood })}
+          onPress={handleSaveExpense}
           style={[commonStyles.button, { backgroundColor: theme.colors.primary, borderRadius: 16 }]}
           disabled={loading || !title || !category || !amount}
           icon="plus"
