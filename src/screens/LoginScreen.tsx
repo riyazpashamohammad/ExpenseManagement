@@ -22,7 +22,7 @@ export default function LoginScreen({ navigation }: any) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       await AsyncStorage.setItem('authUser', JSON.stringify(userCredential.user));
-      navigation.replace('Dashboard');
+  // navigation will be handled by useEffect after user state updates
     } catch (error: any) {
       alert(error.message);
     }
@@ -32,7 +32,16 @@ export default function LoginScreen({ navigation }: any) {
   // If already logged in, redirect to Dashboard
   React.useEffect(() => {
     if (!loading && user) {
-      navigation.replace('Dashboard');
+      // Prevent navigation loop if already on Dashboard
+      if (navigation.getState && navigation.getState().routes) {
+        const routes = navigation.getState().routes;
+        const currentRoute = routes[routes.length - 1]?.name;
+        if (currentRoute !== 'Dashboard') {
+          navigation.replace('Dashboard');
+        }
+      } else {
+        navigation.replace('Dashboard');
+      }
     }
   }, [user, loading]);
 

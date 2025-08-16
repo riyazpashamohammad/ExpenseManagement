@@ -5,12 +5,17 @@ import { ScreenBackground } from '../components/ScreenBackground';
 import { commonStyles } from '../theme/commonStyles';
 import CuteDemon from '../../assets/mydemon/cute-demon.png';
 import { useExpenseReport } from '../hooks/useExpenseReport';
+import { useAuth } from '../context/AuthContext';
 
 
-export default function ReportScreen() {
+export default function ReportScreen({ navigation }: any) {
   const { daily, monthly, yearly, category, loading, error } = useExpenseReport();
   const [selectedTab, setSelectedTab] = useState<'daily' | 'monthly' | 'yearly' | 'category'>('daily');
-
+  const { appUser } = useAuth();
+  React.useEffect(() => {
+    if (!appUser) navigation.replace('Login');
+  }, [appUser]);
+  if (!appUser) return null;
   if (loading) {
     return (
       <ScreenBackground>

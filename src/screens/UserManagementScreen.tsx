@@ -7,12 +7,16 @@ import { Text, Button, Card, TextInput, Title } from 'react-native-paper';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { AppUser, UserRole } from '../types/user';
+import { useAuth } from '../context/AuthContext';
 
-export default function UserManagementScreen() {
+export default function UserManagementScreen({ navigation }: any) {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-
+  const { appUser } = useAuth();
+  React.useEffect(() => {
+    if (!appUser) navigation.replace('Login');
+  }, [appUser]);
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
@@ -31,7 +35,7 @@ export default function UserManagementScreen() {
       Alert.alert('Error', 'Failed to update role');
     }
   };
-
+  if (!appUser) return null;
   return (
     <ScreenBackground>
       <Title>User Management</Title>

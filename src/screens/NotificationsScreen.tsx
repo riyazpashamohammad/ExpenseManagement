@@ -1,17 +1,27 @@
 import React from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { Text, List, Button } from 'react-native-paper';
 import { useNotification } from '../context/NotificationContext';
 
-const NotificationsScreen = () => {
+import { useAuth } from '../context/AuthContext';
+const NotificationsScreen = ({ navigation }: any) => {
   const { notifications, markAllAsRead, markAsRead } = useNotification();
   const [expandedId, setExpandedId] = React.useState<string | null>(null);
-
+  const { appUser } = useAuth();
+  React.useEffect(() => {
+    if (!appUser) navigation.replace('Login');
+  }, [appUser]);
   const handlePress = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
     markAsRead(id);
   };
-
+  if (!appUser) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#6200ee" />
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Notifications</Text>

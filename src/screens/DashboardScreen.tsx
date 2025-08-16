@@ -11,6 +11,17 @@ export default function DashboardScreen({ navigation }: any) {
   const theme = useTheme();
   const { appUser } = useAuth();
   const { width, height } = Dimensions.get('window');
+  const [checking, setChecking] = React.useState(true);
+  React.useEffect(() => {
+    if (typeof appUser === 'undefined' || appUser === null) {
+      setChecking(true);
+    } else {
+      setChecking(false);
+      if (!appUser) navigation.replace('Login');
+    }
+  }, [appUser]);
+  if (checking) return null;
+  if (!appUser) return null;
   return (
     <ImageBackground
       source={theme.images.background}
