@@ -3,9 +3,7 @@ import React,{ useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { ScreenBackground } from '../components/ScreenBackground';
 import { commonStyles } from '../theme/commonStyles';
-// Placeholder for cute icon, replace with your own K-drama themed image
 import CuteDemon from '../../assets/mydemon/cute-demon.png';
-import { VictoryBar, VictoryChart, VictoryTheme, VictoryPie } from 'victory';
 import { useExpenseReport } from '../hooks/useExpenseReport';
 
 

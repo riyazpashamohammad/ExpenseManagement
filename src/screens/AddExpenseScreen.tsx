@@ -1,6 +1,6 @@
 // src/screens/AddExpenseScreen.tsx
 import React from 'react';
-import { ActivityIndicator, Image, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, Image, View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { TextInput, Button, Snackbar, Title, HelperText } from 'react-native-paper';
 import { useAddExpense } from '../hooks/useAddExpense';
 import { Picker } from '@react-native-picker/picker';
@@ -27,6 +27,16 @@ export default function AddExpenseScreen({ navigation }: any) {
     error,
     saveExpense,
   } = useAddExpense();
+
+  // Emoji mood state
+  const [selectedMood, setSelectedMood] = React.useState<string>('');
+  const moodEmojis = [
+    { emoji: '😊', label: 'Happy' },
+    { emoji: '😢', label: 'Sad' },
+    { emoji: '😐', label: 'Dull' },
+    { emoji: '😡', label: 'Angry' },
+    { emoji: '🤩', label: 'Excited' },
+  ];
   const [showSuccess, setShowSuccess] = React.useState(false);
   const [showError, setShowError] = React.useState(false);
   const theme = useTheme();
@@ -46,6 +56,28 @@ export default function AddExpenseScreen({ navigation }: any) {
     <ScreenBackground>
       <Image source={theme.images.cuteDemon} style={commonStyles.cuteImage} />
       <Title style={[commonStyles.title, { color: theme.colors.primary }]}>Add Expense</Title>
+      {/* Mood Emoji Row */}
+      <View style={styles.moodRow}>
+        {moodEmojis.map((mood) => (
+          <TouchableOpacity
+            key={mood.emoji}
+            style={[
+              styles.moodEmojiTouchable,
+              selectedMood === mood.emoji && styles.selectedMoodEmojiTouchable,
+            ]}
+            onPress={() => setSelectedMood(mood.emoji)}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.moodEmojiText,
+              selectedMood === mood.emoji && styles.selectedMoodEmojiTextSelected,
+            ]}>
+              {mood.emoji}
+            </Text>
+            <Text style={styles.moodLabel}>{mood.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
       <TextInput
         label="Title"
         value={title}
@@ -106,7 +138,7 @@ export default function AddExpenseScreen({ navigation }: any) {
       <HelperText type="info">Enter the expense details above.</HelperText>
       <Button
         mode="contained"
-        onPress={() => saveExpense()}
+        onPress={() => saveExpense({ mood: selectedMood })}
         style={[commonStyles.button, { backgroundColor: theme.colors.primary, borderRadius: 16 }]}
         disabled={loading || !title || !category || !amount}
         icon="plus"
@@ -130,7 +162,7 @@ export default function AddExpenseScreen({ navigation }: any) {
       >
         {error}
       </Snackbar>
-  </ScreenBackground>
+    </ScreenBackground>
   );
 }
 
@@ -158,5 +190,55 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#4B3869',
     fontWeight: 'bold',
+  },
+  moodRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    marginBottom: 16,
+    gap: 8,
+  },
+  moodEmojiTouchable: {
+    alignItems: 'center',
+    marginHorizontal: 6,
+    padding: 4,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#A084CA',
+    backgroundColor: '#fff',
+    minWidth: 54,
+    minHeight: 64,
+    elevation: 2,
+    shadowColor: '#A084CA',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    marginBottom: 0,
+  },
+  selectedMoodEmojiTouchable: {
+    borderColor: '#FFB300',
+    backgroundColor: '#FFF7E0',
+    elevation: 4,
+    shadowColor: '#FFB300',
+  },
+  moodEmojiText: {
+    fontSize: 32,
+    textAlign: 'center',
+    color: '#4B3869',
+    marginBottom: 2,
+    marginTop: 2,
+  },
+  selectedMoodEmojiTextSelected: {
+    color: '#FFB300',
+    textShadowColor: '#FFF7E0',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  moodLabel: {
+    fontSize: 12,
+    color: '#4B3869',
+    marginTop: 0,
+    textAlign: 'center',
+    fontWeight: '600',
   },
 });

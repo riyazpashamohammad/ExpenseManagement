@@ -3,6 +3,11 @@ import { db, auth } from '../services/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { AppUser, Group } from '../types/user';
 
+
+export interface SaveExpenseOptions {
+  mood?: string;
+}
+
 export function useAddExpense() {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Groceries');
@@ -14,7 +19,7 @@ export function useAddExpense() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const saveExpense = async (onSuccess?: () => void) => {
+  const saveExpense = async (options?: SaveExpenseOptions) => {
     setLoading(true);
     setError('');
     setSuccess(false);
@@ -33,13 +38,13 @@ export function useAddExpense() {
         userId: user.uid,
         groupId: groupId || null,
         comment,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
+        mood: options?.mood || null,
       });
       setSuccess(true);
       setTitle('');
       setCategory('');
       setAmount('');
-      if (onSuccess) onSuccess();
     } catch (e: any) {
       setError(e.message || 'Failed to save expense');
     } finally {
