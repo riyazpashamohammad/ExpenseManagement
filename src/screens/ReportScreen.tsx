@@ -1,17 +1,46 @@
 // src/screens/Report.tsx
-import React,{ useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { BarChart, PieChart } from 'react-native-chart-kit';
 import { ScreenBackground } from '../components/ScreenBackground';
 import { commonStyles } from '../theme/commonStyles';
-import CuteDemon from '../../assets/mydemon/cute-demon.png';
+const CuteDemon = require('../../assets/mydemon/cute-demon.png');
 import { useExpenseReport } from '../hooks/useExpenseReport';
+import { db } from '../services/firebase';
+import { collection, getDocs } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 
 
 export default function ReportScreen({ navigation }: any) {
-  const { daily, monthly, yearly, category, loading, error } = useExpenseReport();
-  const [selectedTab, setSelectedTab] = useState<'daily' | 'monthly' | 'yearly' | 'category'>('daily');
   const { appUser } = useAuth();
+  const { daily, monthly, yearly, category, expenses, loading, error } = useExpenseReport();
+  // Groupwise summary for admin (group name and sum of all users in that group)
+  const [groupwise, setGroupwise] = React.useState<{ x: string, y: number }[]>([]);
+  React.useEffect(() => {
+    const fetchGroupwise = async () => {
+      if (!appUser || appUser.role !== 'admin' || !expenses) return setGroupwise([]);
+      // 1. Get all users
+      const usersSnap = await getDocs(collection(db, 'users'));
+      const groupMap: Record<string, { name: string, members: string[] }> = {};
+      usersSnap.forEach(doc => {
+        const data = doc.data();
+        if (Array.isArray(data.groupIds)) {
+          data.groupIds.forEach((gid: string) => {
+            if (!groupMap[gid]) groupMap[gid] = { name: gid, members: [] };
+            groupMap[gid].members.push(data.id);
+          });
+        }
+      });
+      // 2. For each group, sum all expenses of its members
+      const groupTotals: { x: string, y: number }[] = Object.entries(groupMap).map(([gid, group]) => {
+        const total = expenses.filter(e => group.members.includes(e.userId)).reduce((sum, e) => sum + e.amount, 0);
+        return { x: group.name, y: total };
+      });
+      setGroupwise(groupTotals.filter(g => g.y > 0));
+    };
+    fetchGroupwise();
+  }, [appUser, expenses]);
+  const [selectedTab, setSelectedTab] = useState<'daily' | 'monthly' | 'yearly' | 'category'>('daily');
   React.useEffect(() => {
     if (!appUser) navigation.replace('Login');
   }, [appUser]);
@@ -34,10 +63,36 @@ export default function ReportScreen({ navigation }: any) {
     );
   }
 
+  const chartConfig = {
+    backgroundGradientFrom: '#fff0f6',
+    backgroundGradientTo: '#fff0f6',
+    color: (opacity = 1) => `rgba(185, 131, 255, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(109, 89, 122, ${opacity})`,
+    barPercentage: 0.7,
+    useShadowColorFromDataset: false,
+    decimalPlaces: 0,
+  };
+
   const tabData = {
     daily: {
       title: '📅 Daily Expense Report',
       data: Object.entries(daily),
+      chart: (
+        <BarChart
+          data={{
+            labels: Object.keys(daily),
+            datasets: [{ data: Object.values(daily) as number[] }],
+          }}
+          width={340}
+          height={220}
+          chartConfig={chartConfig}
+          fromZero
+          showValuesOnTopOfBars
+          style={{ borderRadius: 16 }}
+          yAxisLabel="₹"
+          yAxisSuffix=""
+        />
+      ),
       render: (item: [string, number]) => (
         <Text style={styles.item}>{item[0]}: ₹{item[1].toFixed(2)}</Text>
       ),
@@ -45,6 +100,22 @@ export default function ReportScreen({ navigation }: any) {
     monthly: {
       title: '📆 Monthly Summary',
       data: Object.entries(monthly),
+      chart: (
+        <BarChart
+          data={{
+            labels: Object.keys(monthly),
+            datasets: [{ data: Object.values(monthly) as number[] }],
+          }}
+          width={340}
+          height={220}
+          chartConfig={chartConfig}
+          fromZero
+          showValuesOnTopOfBars
+          style={{ borderRadius: 16 }}
+          yAxisLabel="₹"
+          yAxisSuffix=""
+        />
+      ),
       render: (item: [string, number]) => (
         <Text style={styles.item}>{item[0]}: ₹{item[1].toFixed(2)}</Text>
       ),
@@ -52,6 +123,22 @@ export default function ReportScreen({ navigation }: any) {
     yearly: {
       title: '📅 Yearly Summary',
       data: Object.entries(yearly),
+      chart: (
+        <BarChart
+          data={{
+            labels: Object.keys(yearly),
+            datasets: [{ data: Object.values(yearly) as number[] }],
+          }}
+          width={340}
+          height={220}
+          chartConfig={chartConfig}
+          fromZero
+          showValuesOnTopOfBars
+          style={{ borderRadius: 16 }}
+          yAxisLabel="₹"
+          yAxisSuffix=""
+        />
+      ),
       render: (item: [string, number]) => (
         <Text style={styles.item}>{item[0]}: ₹{item[1].toFixed(2)}</Text>
       ),
@@ -59,6 +146,24 @@ export default function ReportScreen({ navigation }: any) {
     category: {
       title: '📂 Category-wise Summary',
       data: Object.entries(category),
+      chart: (
+        <PieChart
+          data={Object.entries(category).map(([x, y], i) => ({
+            name: x,
+            population: y as number,
+            color: ["#b983ff", "#f3c4fb", "#ff6f91", "#6d597a", "#fff0f6"][i % 5],
+            legendFontColor: '#6d597a',
+            legendFontSize: 12,
+          }))}
+          width={340}
+          height={220}
+          chartConfig={chartConfig}
+          accessor="population"
+          backgroundColor="transparent"
+          paddingLeft="15"
+          style={{ borderRadius: 16 }}
+        />
+      ),
       render: (item: [string, number]) => (
         <Text style={styles.item}>🌸 {item[0]}: ₹{item[1].toFixed(2)}</Text>
       ),
@@ -85,6 +190,7 @@ export default function ReportScreen({ navigation }: any) {
         </View>
         <View style={styles.sectionCard}>
           <Text style={styles.header}>{tabData[selectedTab].title}</Text>
+          {tabData[selectedTab].chart}
           <FlatList
             data={tabData[selectedTab].data}
             keyExtractor={(item) => item[0]}
@@ -94,6 +200,39 @@ export default function ReportScreen({ navigation }: any) {
             ListEmptyComponent={<Text style={{ color: '#b983ff', alignSelf: 'center', marginTop: 12 }}>No data found.</Text>}
           />
         </View>
+
+        {/* Admin: Groupwise summary */}
+        {appUser.role === 'admin' && groupwise.length > 0 && (
+          <View style={styles.sectionCard}>
+            <Text style={styles.header}>Groupwise Expenses</Text>
+            <PieChart
+              data={groupwise.map((g, i) => ({
+                name: g.x,
+                population: g.y,
+                color: ["#b983ff", "#f3c4fb", "#ff6f91", "#6d597a", "#fff0f6"][i % 5],
+                legendFontColor: '#6d597a',
+                legendFontSize: 12,
+              }))}
+              width={340}
+              height={220}
+              chartConfig={chartConfig}
+              accessor="population"
+              backgroundColor="transparent"
+              paddingLeft="15"
+              style={{ borderRadius: 16 }}
+            />
+            <FlatList
+              data={groupwise}
+              keyExtractor={(item) => item.x}
+              renderItem={({ item }) => (
+                <Text style={styles.item}>{item.x}: ₹{item.y.toFixed(2)}</Text>
+              )}
+              style={styles.list}
+              scrollEnabled={false}
+              ListEmptyComponent={<Text style={{ color: '#b983ff', alignSelf: 'center', marginTop: 12 }}>No data found.</Text>}
+            />
+          </View>
+        )}
       </ScrollView>
     </ScreenBackground>
   );
