@@ -1,8 +1,10 @@
 // src/screens/Report.tsx
 import React,{ useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { ScreenBackground } from '../components/ScreenBackground';
+import { commonStyles } from '../theme/commonStyles';
 // Placeholder for cute icon, replace with your own K-drama themed image
-import CuteDemon from '../../assets/kdrama/cute-demon.png'; // Adjust the path as necessary
+import CuteDemon from '../../assets/mydemon/cute-demon.png';
 import { VictoryBar, VictoryChart, VictoryTheme, VictoryPie } from 'victory';
 import { useExpenseReport } from '../hooks/useExpenseReport';
 
@@ -13,19 +15,19 @@ export default function ReportScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <Image source={CuteDemon} style={styles.cuteImage} />
+      <ScreenBackground>
+        <Image source={CuteDemon} style={commonStyles.cuteImage} />
         <ActivityIndicator size="large" color="#b983ff" />
         <Text style={{ marginTop: 12, color: '#b983ff', fontWeight: 'bold' }}>Loading reports...</Text>
-      </View>
+      </ScreenBackground>
     );
   }
   if (error) {
     return (
-      <View style={styles.center}>
-        <Image source={CuteDemon} style={styles.cuteImage} />
+      <ScreenBackground>
+        <Image source={CuteDemon} style={commonStyles.cuteImage} />
         <Text style={{ color: '#ff6f91', fontWeight: 'bold' }}>{error}</Text>
-      </View>
+      </ScreenBackground>
     );
   }
 
@@ -61,71 +63,41 @@ export default function ReportScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ alignItems: 'center', paddingBottom: 32 }}>
-      <Image source={CuteDemon} style={styles.cuteImage} />
-      <Text style={styles.title}>Expense Report</Text>
-      <View style={styles.tabBar}>
-        {(['daily', 'monthly', 'yearly', 'category'] as const).map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            style={[styles.tabButton, selectedTab === tab && styles.tabButtonActive]}
-            onPress={() => setSelectedTab(tab)}
-          >
-            <Text style={[styles.tabText, selectedTab === tab && styles.tabTextActive]}>
-              {tabData[tab].title.split(' ')[0]}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <View style={styles.sectionCard}>
-        <Text style={styles.header}>{tabData[selectedTab].title}</Text>
-        <FlatList
-          data={tabData[selectedTab].data}
-          keyExtractor={(item) => item[0]}
-          renderItem={({ item }) => tabData[selectedTab].render(item)}
-          style={styles.list}
-          scrollEnabled={false}
-          ListEmptyComponent={<Text style={{ color: '#b983ff', alignSelf: 'center', marginTop: 12 }}>No data found.</Text>}
-        />
-      </View>
-    </ScrollView>
+    <ScreenBackground style={{ paddingHorizontal: 0 }}>
+      <ScrollView style={{ width: '100%' }} contentContainerStyle={{ alignItems: 'center', paddingBottom: 32 }}>
+        <Image source={CuteDemon} style={commonStyles.cuteImage} />
+        <Text style={[commonStyles.title, { color: '#b983ff' }]}>Expense Report</Text>
+        <View style={styles.tabBar}>
+          {(['daily', 'monthly', 'yearly', 'category'] as const).map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              style={[styles.tabButton, selectedTab === tab && styles.tabButtonActive]}
+              onPress={() => setSelectedTab(tab)}
+            >
+              <Text style={[styles.tabText, selectedTab === tab && styles.tabTextActive]}>
+                {tabData[tab].title.split(' ')[0]}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <View style={styles.sectionCard}>
+          <Text style={styles.header}>{tabData[selectedTab].title}</Text>
+          <FlatList
+            data={tabData[selectedTab].data}
+            keyExtractor={(item) => item[0]}
+            renderItem={({ item }) => tabData[selectedTab].render(item)}
+            style={styles.list}
+            scrollEnabled={false}
+            ListEmptyComponent={<Text style={{ color: '#b983ff', alignSelf: 'center', marginTop: 12 }}>No data found.</Text>}
+          />
+        </View>
+      </ScrollView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    backgroundColor: '#fbeaff', // pastel purple-pink
-    flex: 1,
-  },
-  cuteImage: {
-    width: 120,
-    height: 120,
-    resizeMode: 'contain',
-    marginTop: 12,
-    marginBottom: 8,
-    borderRadius: 60,
-    borderWidth: 3,
-    borderColor: '#b983ff',
-    backgroundColor: '#fff0f6',
-    shadowColor: '#b983ff',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-    alignSelf: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#b983ff',
-    marginBottom: 16,
-    marginTop: 8,
-    textShadowColor: '#f3c4fb',
-    textShadowOffset: { width: 1, height: 2 },
-    textShadowRadius: 4,
-    alignSelf: 'center',
-  },
+  // container and cuteImage/title styles removed, using commonStyles instead
   sectionCard: {
     backgroundColor: '#fff0f6',
     borderRadius: 20,

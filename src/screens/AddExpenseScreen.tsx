@@ -1,10 +1,12 @@
 // src/screens/AddExpenseScreen.tsx
 import React from 'react';
-import { View, StyleSheet, ActivityIndicator, Image } from 'react-native';
+import { ActivityIndicator, Image, View, StyleSheet } from 'react-native';
 import { TextInput, Button, Snackbar, Title, HelperText } from 'react-native-paper';
 import { useAddExpense } from '../hooks/useAddExpense';
 import { Picker } from '@react-native-picker/picker';
 import { useTheme } from '../theme/ThemeContext';
+import { ScreenBackground } from '../components/ScreenBackground';
+import { commonStyles } from '../theme/commonStyles';
 
 export default function AddExpenseScreen({ navigation }: any) {
   const {
@@ -41,14 +43,14 @@ export default function AddExpenseScreen({ navigation }: any) {
   }, [success, error]);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}> 
-      <Image source={theme.images.heart} style={styles.cuteImage} />
-      <Title style={[styles.title, { color: theme.colors.primary }]}>Add Expense</Title>
+    <ScreenBackground>
+      <Image source={theme.images.cuteDemon} style={commonStyles.cuteImage} />
+      <Title style={[commonStyles.title, { color: theme.colors.primary }]}>Add Expense</Title>
       <TextInput
         label="Title"
         value={title}
         onChangeText={setTitle}
-        style={styles.input}
+        style={commonStyles.input}
         mode="outlined"
       />
       <View style={styles.pickerWrapper}>
@@ -73,7 +75,7 @@ export default function AddExpenseScreen({ navigation }: any) {
         label="Comments"
         value={comment}
         onChangeText={setComment}
-        style={styles.input}
+        style={commonStyles.input}
         mode="outlined"
         multiline
         numberOfLines={2}
@@ -84,7 +86,7 @@ export default function AddExpenseScreen({ navigation }: any) {
         value={amount}
         onChangeText={setAmount}
         keyboardType="numeric"
-        style={styles.input}
+        style={commonStyles.input}
         mode="outlined"
       />
       <View style={styles.pickerWrapper}>
@@ -105,7 +107,7 @@ export default function AddExpenseScreen({ navigation }: any) {
       <Button
         mode="contained"
         onPress={() => saveExpense()}
-        style={[styles.button, { backgroundColor: theme.colors.primary, borderRadius: 16 }]}
+        style={[commonStyles.button, { backgroundColor: theme.colors.primary, borderRadius: 16 }]}
         disabled={loading || !title || !category || !amount}
         icon="plus"
       >
@@ -128,38 +130,11 @@ export default function AddExpenseScreen({ navigation }: any) {
       >
         {error}
       </Snackbar>
-    </View>
+  </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cuteImage: {
-    width: 80,
-    height: 80,
-    marginBottom: 16,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: '#A084CA',
-    backgroundColor: '#fff0f6',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 24,
-    alignSelf: 'center',
-  },
-  input: {
-    marginBottom: 16,
-    backgroundColor: '#fff',
-    width: '100%',
-    maxWidth: 350,
-  },
   pickerWrapper: {
     marginBottom: 16,
     backgroundColor: '#fff',
@@ -183,11 +158,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#4B3869',
     fontWeight: 'bold',
-  },
-  button: {
-    marginTop: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-    backgroundColor: '#A084CA',
   },
 });

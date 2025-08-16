@@ -1,6 +1,8 @@
 // src/screens/UserManagementScreen.tsx
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, Alert } from 'react-native';
+import { Alert, FlatList, View, StyleSheet } from 'react-native';
+import { ScreenBackground } from '../components/ScreenBackground';
+import { commonStyles } from '../theme/commonStyles';
 import { Text, Button, Card, TextInput, Title } from 'react-native-paper';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../services/firebase';
@@ -31,18 +33,18 @@ export default function UserManagementScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenBackground>
       <Title>User Management</Title>
       <TextInput
         label="Search by email"
         value={search}
         onChangeText={setSearch}
-        style={styles.input}
+        style={commonStyles.input}
       />
       <FlatList
         data={users.filter(u => u.email.includes(search))}
-        keyExtractor={u => u.id}
-        renderItem={({ item }) => (
+  keyExtractor={(u: any) => u.id}
+  renderItem={({ item }: { item: any }) => (
           <Card style={styles.card}>
             <Card.Content>
               <Text>Email: {item.email}</Text>
@@ -76,13 +78,11 @@ export default function UserManagementScreen() {
           });
         }}
       />
-    </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  input: { marginBottom: 12 },
   card: { marginBottom: 12 },
   button: { marginRight: 8 },
 });
