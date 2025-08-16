@@ -3,13 +3,14 @@ import React from 'react';
 import { View, StyleSheet, Image, ImageBackground } from 'react-native';
 import { Platform, Dimensions } from 'react-native';
 import { Card, Button, Text } from 'react-native-paper';
+import Header from '../components/Header';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeContext';
 
 
 export default function DashboardScreen({ navigation }: any) {
   const theme = useTheme();
-  const { logout, appUser } = useAuth();
+  const { appUser } = useAuth();
   const { width, height } = Dimensions.get('window');
   return (
     <ImageBackground
@@ -17,7 +18,8 @@ export default function DashboardScreen({ navigation }: any) {
       style={{ width, height }}
       resizeMode="stretch"
     >
-  <View style={[styles.container, { backgroundColor: 'transparent' }]}> 
+      <Header />
+      <View style={[styles.container, { backgroundColor: 'transparent' }]}> 
         <Image source={theme.images.cuteDemon} style={styles.cuteImage} />
         <Text variant="titleLarge" style={[styles.title, { color: theme.colors.primary }]}>Expense Dashboard</Text>
         <Card style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}> 
@@ -51,16 +53,6 @@ export default function DashboardScreen({ navigation }: any) {
             Manage Users
           </Button>
         )}
-        <Button
-          mode="outlined"
-          style={[styles.button, { borderColor: theme.colors.primary, marginTop: 16 }]}
-          onPress={async () => {
-            await logout();
-            navigation.replace('Login');
-          } }
-        >
-          Logout
-        </Button>
       </View>
     </ImageBackground>
   );

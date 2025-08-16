@@ -6,6 +6,7 @@ import { useAddExpense } from '../hooks/useAddExpense';
 import { Picker } from '@react-native-picker/picker';
 import { useTheme } from '../theme/ThemeContext';
 import { ScreenBackground } from '../components/ScreenBackground';
+
 import { commonStyles } from '../theme/commonStyles';
 
 export default function AddExpenseScreen({ navigation }: any) {
@@ -51,122 +52,131 @@ export default function AddExpenseScreen({ navigation }: any) {
     }
     if (error) setShowError(true);
   }, [success, error]);
-
   return (
     <ScreenBackground>
-      <Image source={theme.images.cuteDemon} style={commonStyles.cuteImage} />
-      <Title style={[commonStyles.title, { color: theme.colors.primary }]}>Add Expense</Title>
-      {/* Mood Emoji Row */}
-      <View style={styles.moodRow}>
-        {moodEmojis.map((mood) => (
-          <TouchableOpacity
-            key={mood.emoji}
-            style={[
-              styles.moodEmojiTouchable,
-              selectedMood === mood.emoji && styles.selectedMoodEmojiTouchable,
-            ]}
-            onPress={() => setSelectedMood(mood.emoji)}
-            activeOpacity={0.7}
+      <View style={styles.mainContent}>
+        <Image source={theme.images.cuteDemon} style={commonStyles.cuteImage} />
+        <Title style={[commonStyles.title, { color: theme.colors.primary }]}>Add Expense</Title>
+        {/* Mood Emoji Row */}
+        <View style={styles.moodRow}>
+          {moodEmojis.map((mood) => (
+            <TouchableOpacity
+              key={mood.emoji}
+              style={[
+                styles.moodEmojiTouchable,
+                selectedMood === mood.emoji && styles.selectedMoodEmojiTouchable,
+              ]}
+              onPress={() => setSelectedMood(mood.emoji)}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.moodEmojiText,
+                selectedMood === mood.emoji && styles.selectedMoodEmojiTextSelected,
+              ]}>
+                {mood.emoji}
+              </Text>
+              <Text style={styles.moodLabel}>{mood.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <TextInput
+          label="Title"
+          value={title}
+          onChangeText={setTitle}
+          style={commonStyles.input}
+          mode="outlined"
+        />
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={category}
+            style={styles.picker}
+            itemStyle={styles.pickerItem}
+            dropdownIconColor={theme.colors.primary}
+            onValueChange={(itemValue: string) => setCategory(itemValue)}
           >
-            <Text style={[
-              styles.moodEmojiText,
-              selectedMood === mood.emoji && styles.selectedMoodEmojiTextSelected,
-            ]}>
-              {mood.emoji}
-            </Text>
-            <Text style={styles.moodLabel}>{mood.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <TextInput
-        label="Title"
-        value={title}
-        onChangeText={setTitle}
-        style={commonStyles.input}
-        mode="outlined"
-      />
-      <View style={styles.pickerWrapper}>
-        <Picker
-          selectedValue={category}
-          style={styles.picker}
-          itemStyle={styles.pickerItem}
-          dropdownIconColor={theme.colors.primary}
-          onValueChange={(itemValue: string) => setCategory(itemValue)}
+            <Picker.Item label="Groceries" value="Groceries" />
+            <Picker.Item label="Vegetables" value="Vegetables" />
+            <Picker.Item label="Fruits" value="Fruits" />
+            <Picker.Item label="Snacks" value="Snacks" />
+            <Picker.Item label="Transport" value="Transport" />
+            <Picker.Item label="Utilities" value="Utilities" />
+            <Picker.Item label="Shopping" value="Shopping" />
+            <Picker.Item label="Other" value="Other" />
+          </Picker>
+        </View>
+        <TextInput
+          label="Comments"
+          value={comment}
+          onChangeText={setComment}
+          style={commonStyles.input}
+          mode="outlined"
+          multiline
+          numberOfLines={2}
+          placeholder="Add any notes or comments..."
+        />
+        <TextInput
+          label="Amount"
+          value={amount}
+          onChangeText={setAmount}
+          keyboardType="numeric"
+          style={commonStyles.input}
+          mode="outlined"
+        />
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={currency}
+            style={styles.picker}
+            itemStyle={styles.pickerItem}
+            dropdownIconColor={theme.colors.primary}
+            onValueChange={(itemValue: string) => setCurrency(itemValue)}
+          >
+            <Picker.Item label="INR (₹)" value="INR" />
+            <Picker.Item label="USD ($)" value="USD" />
+            <Picker.Item label="EUR (€)" value="EUR" />
+          </Picker>
+        </View>
+        {/* TODO: Add group selection UI here */}
+        <HelperText type="info">Enter the expense details above.</HelperText>
+        <Button
+          mode="contained"
+          onPress={() => saveExpense({ mood: selectedMood })}
+          style={[commonStyles.button, { backgroundColor: theme.colors.primary, borderRadius: 16 }]}
+          disabled={loading || !title || !category || !amount}
+          icon="plus"
         >
-          <Picker.Item label="Groceries" value="Groceries" />
-          <Picker.Item label="Vegetables" value="Vegetables" />
-          <Picker.Item label="Fruits" value="Fruits" />
-          <Picker.Item label="Snacks" value="Snacks" />
-          <Picker.Item label="Transport" value="Transport" />
-          <Picker.Item label="Utilities" value="Utilities" />
-          <Picker.Item label="Shopping" value="Shopping" />
-          <Picker.Item label="Other" value="Other" />
-        </Picker>
-      </View>
-      <TextInput
-        label="Comments"
-        value={comment}
-        onChangeText={setComment}
-        style={commonStyles.input}
-        mode="outlined"
-        multiline
-        numberOfLines={2}
-        placeholder="Add any notes or comments..."
-      />
-      <TextInput
-        label="Amount"
-        value={amount}
-        onChangeText={setAmount}
-        keyboardType="numeric"
-        style={commonStyles.input}
-        mode="outlined"
-      />
-      <View style={styles.pickerWrapper}>
-        <Picker
-          selectedValue={currency}
-          style={styles.picker}
-          itemStyle={styles.pickerItem}
-          dropdownIconColor={theme.colors.primary}
-          onValueChange={(itemValue: string) => setCurrency(itemValue)}
+          {loading ? 'Saving...' : 'Save Expense'}
+        </Button>
+        {loading && <ActivityIndicator size="large" style={{ marginTop: 10 }} />}
+        <Snackbar
+          visible={showSuccess}
+          onDismiss={() => setShowSuccess(false)}
+          duration={1000}
+          style={{ backgroundColor: theme.colors.accent }}
         >
-          <Picker.Item label="INR (₹)" value="INR" />
-          <Picker.Item label="USD ($)" value="USD" />
-          <Picker.Item label="EUR (€)" value="EUR" />
-        </Picker>
+          Expense saved successfully!
+        </Snackbar>
+        <Snackbar
+          visible={showError}
+          onDismiss={() => setShowError(false)}
+          duration={2000}
+          style={{ backgroundColor: '#f44336' }}
+        >
+          {error}
+        </Snackbar>
       </View>
-      {/* TODO: Add group selection UI here */}
-      <HelperText type="info">Enter the expense details above.</HelperText>
-      <Button
-        mode="contained"
-        onPress={() => saveExpense({ mood: selectedMood })}
-        style={[commonStyles.button, { backgroundColor: theme.colors.primary, borderRadius: 16 }]}
-        disabled={loading || !title || !category || !amount}
-        icon="plus"
-      >
-        {loading ? 'Saving...' : 'Save Expense'}
-      </Button>
-      {loading && <ActivityIndicator size="large" style={{ marginTop: 10 }} />}
-      <Snackbar
-        visible={showSuccess}
-        onDismiss={() => setShowSuccess(false)}
-        duration={1000}
-        style={{ backgroundColor: theme.colors.accent }}
-      >
-        Expense saved successfully!
-      </Snackbar>
-      <Snackbar
-        visible={showError}
-        onDismiss={() => setShowError(false)}
-        duration={2000}
-        style={{ backgroundColor: '#f44336' }}
-      >
-        {error}
-      </Snackbar>
     </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  mainContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingBottom: 40,
+    paddingTop: 8,
+    width: '100%',
+  },
   pickerWrapper: {
     marginBottom: 16,
     backgroundColor: '#fff',
