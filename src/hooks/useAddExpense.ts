@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { db, auth } from '../services/firebase';
 import { collection, addDoc } from 'firebase/firestore';
+import { AppUser, Group } from '../types/user';
 
 export function useAddExpense() {
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState('Groceries');
   const [amount, setAmount] = useState('');
+  const [currency, setCurrency] = useState('INR');
+  const [groupId, setGroupId] = useState('');
+  const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -25,7 +29,10 @@ export function useAddExpense() {
         title,
         category,
         amount: parseFloat(amount),
+        currency,
         userId: user.uid,
+        groupId: groupId || null,
+        comment,
         date: new Date().toISOString()
       });
       setSuccess(true);
@@ -47,6 +54,12 @@ export function useAddExpense() {
     setCategory,
     amount,
     setAmount,
+    currency,
+    setCurrency,
+    groupId,
+    setGroupId,
+    comment,
+    setComment,
     loading,
     success,
     error,

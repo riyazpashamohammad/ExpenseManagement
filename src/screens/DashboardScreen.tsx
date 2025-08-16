@@ -1,19 +1,21 @@
 // src/screens/DashboardScreen.tsx
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Image } from 'react-native';
-import { Card, Title, Paragraph, Button } from 'react-native-paper';
+import { View, StyleSheet, Image } from 'react-native';
+import { Card, Button, Text } from 'react-native-paper';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeContext';
+
 
 export default function DashboardScreen({ navigation }: any) {
   const theme = useTheme();
+  const { logout, appUser } = useAuth();
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}> 
       <Image source={theme.images.cuteDemon} style={styles.cuteImage} />
-      <Title style={[styles.title, { color: theme.colors.primary }]}>Expense Dashboard</Title>
+      <Text variant="titleLarge" style={[styles.title, { color: theme.colors.primary }]}>Expense Dashboard</Text>
       <Card style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}> 
         <Card.Content>
-          <Paragraph style={[styles.paragraph, { color: theme.colors.text }]}>Welcome! Track your expenses and view detailed reports.</Paragraph>
+          <Text variant='bodyMedium' style={[styles.paragraph, { color: theme.colors.text }]}>SweetHeart! Expenses dekhke karo 💸</Text>
         </Card.Content>
       </Card>
       <Button
@@ -31,6 +33,26 @@ export default function DashboardScreen({ navigation }: any) {
         onPress={() => navigation.navigate('Report')}
       >
         View Report
+      </Button>
+      {appUser?.role === 'admin' && (
+        <Button
+          mode="contained"
+          icon="account"
+          style={[styles.button, { backgroundColor: theme.colors.primary, borderRadius: 16 }]}
+          onPress={() => navigation.navigate('UserManagement')}
+        >
+          Manage Users
+        </Button>
+      )}
+      <Button
+        mode="outlined"
+        style={[styles.button, { borderColor: theme.colors.primary, marginTop: 16 }]}
+        onPress={async () => {
+          await logout();
+          navigation.replace('Login');
+        }}
+      >
+        Logout
       </Button>
     </View>
   );

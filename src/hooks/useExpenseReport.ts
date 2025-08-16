@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { db, auth } from '../services/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { AppUser } from '../types/user';
 import { Expense } from '../types/expense';
 import { format } from 'date-fns';
 
@@ -20,7 +21,15 @@ export function useExpenseReport() {
       try {
         const user = auth.currentUser;
         if (!user) throw new Error('User not logged in');
-        const ref = query(collection(db, 'expenses'), where('userId', '==', user.uid));
+        // TODO: Fetch user role and group info from Firestore
+        // For now, assume admin if email contains 'admin', else normal user
+        const isAdmin = user.email?.includes('admin');
+        let ref;
+        if (isAdmin) {
+          ref = collection(db, 'expenses'); // admin sees all
+        } else {
+          ref = query(collection(db, 'expenses'), where('userId', '==', user.uid));
+        }
         const snapshot = await getDocs(ref);
         const dailyTotals: Record<string, number> = {};
         const monthlyTotals: Record<string, number> = {};

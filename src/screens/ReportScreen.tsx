@@ -1,15 +1,15 @@
 // src/screens/Report.tsx
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, Image } from 'react-native';
+import React,{ useState } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, Image, TouchableOpacity } from 'react-native';
 // Placeholder for cute icon, replace with your own K-drama themed image
-import CuteDemon from '../../assets/kdrama/cute-demon.png';
+import CuteDemon from '../../assets/kdrama/cute-demon.png'; // Adjust the path as necessary
 import { VictoryBar, VictoryChart, VictoryTheme, VictoryPie } from 'victory';
 import { useExpenseReport } from '../hooks/useExpenseReport';
 
 
-
 export default function ReportScreen() {
   const { daily, monthly, yearly, category, loading, error } = useExpenseReport();
+  const [selectedTab, setSelectedTab] = useState<'daily' | 'monthly' | 'yearly' | 'category'>('daily');
 
   if (loading) {
     return (
@@ -29,60 +29,63 @@ export default function ReportScreen() {
     );
   }
 
-  const monthlyChartData = Object.entries(monthly).map(([month, total]) => ({ x: month, y: total }));
-  const yearlyChartData = Object.entries(yearly).map(([year, total]) => ({ x: year, y: total }));
-  const categoryChartData = Object.entries(category).map(([cat, total]) => ({ x: cat, y: total }));
+  const tabData = {
+    daily: {
+      title: '📅 Daily Expense Report',
+      data: Object.entries(daily),
+      render: (item: [string, number]) => (
+        <Text style={styles.item}>{item[0]}: ₹{item[1].toFixed(2)}</Text>
+      ),
+    },
+    monthly: {
+      title: '📆 Monthly Summary',
+      data: Object.entries(monthly),
+      render: (item: [string, number]) => (
+        <Text style={styles.item}>{item[0]}: ₹{item[1].toFixed(2)}</Text>
+      ),
+    },
+    yearly: {
+      title: '📅 Yearly Summary',
+      data: Object.entries(yearly),
+      render: (item: [string, number]) => (
+        <Text style={styles.item}>{item[0]}: ₹{item[1].toFixed(2)}</Text>
+      ),
+    },
+    category: {
+      title: '📂 Category-wise Summary',
+      data: Object.entries(category),
+      render: (item: [string, number]) => (
+        <Text style={styles.item}>🌸 {item[0]}: ₹{item[1].toFixed(2)}</Text>
+      ),
+    },
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ alignItems: 'center', paddingBottom: 32 }}>
       <Image source={CuteDemon} style={styles.cuteImage} />
       <Text style={styles.title}>Expense Report</Text>
-      <View key="daily" style={styles.sectionCard}>
-        <Text style={styles.header}>📅 Daily Expense Report</Text>
-        <FlatList
-          data={Object.entries(daily)}
-          keyExtractor={(item) => item[0]}
-          renderItem={({ item }) => (
-            <Text style={styles.item}>{item[0]}: ₩{item[1].toFixed(2)}</Text>
-          )}
-          style={styles.list}
-          scrollEnabled={false}
-        />
+      <View style={styles.tabBar}>
+        {(['daily', 'monthly', 'yearly', 'category'] as const).map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            style={[styles.tabButton, selectedTab === tab && styles.tabButtonActive]}
+            onPress={() => setSelectedTab(tab)}
+          >
+            <Text style={[styles.tabText, selectedTab === tab && styles.tabTextActive]}>
+              {tabData[tab].title.split(' ')[0]}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
-      <View key="monthly" style={styles.sectionCard}>
-        <Text style={styles.header}>📆 Monthly Summary</Text>
+      <View style={styles.sectionCard}>
+        <Text style={styles.header}>{tabData[selectedTab].title}</Text>
         <FlatList
-          data={Object.entries(monthly)}
+          data={tabData[selectedTab].data}
           keyExtractor={(item) => item[0]}
-          renderItem={({ item }) => (
-            <Text style={styles.item}>{item[0]}: ₩{item[1].toFixed(2)}</Text>
-          )}
+          renderItem={({ item }) => tabData[selectedTab].render(item)}
           style={styles.list}
           scrollEnabled={false}
-        />
-      </View>
-      <View key="yearly" style={styles.sectionCard}>
-        <Text style={styles.header}>📅 Yearly Summary</Text>
-        <FlatList
-          data={Object.entries(yearly)}
-          keyExtractor={(item) => item[0]}
-          renderItem={({ item }) => (
-            <Text style={styles.item}>{item[0]}: ₩{item[1].toFixed(2)}</Text>
-          )}
-          style={styles.list}
-          scrollEnabled={false}
-        />
-      </View>
-      <View key="category" style={styles.sectionCard}>
-        <Text style={styles.header}>📂 Category-wise Summary</Text>
-        <FlatList
-          data={Object.entries(category)}
-          keyExtractor={(item) => item[0]}
-          renderItem={({ item }) => (
-            <Text style={styles.item}>🌸 {item[0]}: ₩{item[1].toFixed(2)}</Text>
-          )}
-          style={styles.list}
-          scrollEnabled={false}
+          ListEmptyComponent={<Text style={{ color: '#b983ff', alignSelf: 'center', marginTop: 12 }}>No data found.</Text>}
         />
       </View>
     </ScrollView>
@@ -169,5 +172,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fbeaff',
+  },
+  tabBar: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  tabButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    marginHorizontal: 6,
+    borderRadius: 16,
+    backgroundColor: '#f3c4fb',
+    borderWidth: 1,
+    borderColor: '#b983ff',
+  },
+  tabButtonActive: {
+    backgroundColor: '#b983ff',
+  },
+  tabText: {
+    color: '#b983ff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  tabTextActive: {
+    color: '#fff',
   },
 });

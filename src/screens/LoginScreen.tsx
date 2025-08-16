@@ -1,24 +1,43 @@
 // src/screens/LoginScreen.tsx
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, StyleSheet, Image } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import { useTheme } from '../theme/ThemeContext';
 import { auth } from '../services/firebase';
 
+import { useAuth } from '../context/AuthContext';
+
+
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const theme = useTheme();
+  const { user, loading } = useAuth();
 
   const handleLogin = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await AsyncStorage.setItem('authUser', JSON.stringify(userCredential.user));
       navigation.replace('Dashboard');
     } catch (error: any) {
       alert(error.message);
     }
   };
+
+
+  // If already logged in, redirect to Dashboard
+  React.useEffect(() => {
+    if (!loading && user) {
+      navigation.replace('Dashboard');
+    }
+  }, [user, loading]);
+
+  if (loading) {
+    // Optionally, show a splash/loading indicator here
+    return null;
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}> 

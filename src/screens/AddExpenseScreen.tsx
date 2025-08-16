@@ -3,6 +3,7 @@ import React from 'react';
 import { View, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { TextInput, Button, Snackbar, Title, HelperText } from 'react-native-paper';
 import { useAddExpense } from '../hooks/useAddExpense';
+import { Picker } from '@react-native-picker/picker';
 import { useTheme } from '../theme/ThemeContext';
 
 export default function AddExpenseScreen({ navigation }: any) {
@@ -13,6 +14,12 @@ export default function AddExpenseScreen({ navigation }: any) {
     setCategory,
     amount,
     setAmount,
+    currency,
+    setCurrency,
+    groupId,
+    setGroupId,
+    comment,
+    setComment,
     loading,
     success,
     error,
@@ -44,12 +51,33 @@ export default function AddExpenseScreen({ navigation }: any) {
         style={styles.input}
         mode="outlined"
       />
+      <View style={styles.pickerWrapper}>
+        <Picker
+          selectedValue={category}
+          style={styles.picker}
+          itemStyle={styles.pickerItem}
+          dropdownIconColor={theme.colors.primary}
+          onValueChange={(itemValue: string) => setCategory(itemValue)}
+        >
+          <Picker.Item label="Groceries" value="Groceries" />
+          <Picker.Item label="Vegetables" value="Vegetables" />
+          <Picker.Item label="Fruits" value="Fruits" />
+          <Picker.Item label="Snacks" value="Snacks" />
+          <Picker.Item label="Transport" value="Transport" />
+          <Picker.Item label="Utilities" value="Utilities" />
+          <Picker.Item label="Shopping" value="Shopping" />
+          <Picker.Item label="Other" value="Other" />
+        </Picker>
+      </View>
       <TextInput
-        label="Category"
-        value={category}
-        onChangeText={setCategory}
+        label="Comments"
+        value={comment}
+        onChangeText={setComment}
         style={styles.input}
         mode="outlined"
+        multiline
+        numberOfLines={2}
+        placeholder="Add any notes or comments..."
       />
       <TextInput
         label="Amount"
@@ -59,6 +87,20 @@ export default function AddExpenseScreen({ navigation }: any) {
         style={styles.input}
         mode="outlined"
       />
+      <View style={styles.pickerWrapper}>
+        <Picker
+          selectedValue={currency}
+          style={styles.picker}
+          itemStyle={styles.pickerItem}
+          dropdownIconColor={theme.colors.primary}
+          onValueChange={(itemValue: string) => setCurrency(itemValue)}
+        >
+          <Picker.Item label="INR (₹)" value="INR" />
+          <Picker.Item label="USD ($)" value="USD" />
+          <Picker.Item label="EUR (€)" value="EUR" />
+        </Picker>
+      </View>
+      {/* TODO: Add group selection UI here */}
       <HelperText type="info">Enter the expense details above.</HelperText>
       <Button
         mode="contained"
@@ -117,6 +159,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     width: '100%',
     maxWidth: 350,
+  },
+  pickerWrapper: {
+    marginBottom: 16,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#A084CA',
+    width: '100%',
+    maxWidth: 350,
+    overflow: 'hidden',
+    justifyContent: 'center',
+  },
+  picker: {
+    width: '100%',
+    color: '#4B3869',
+    fontSize: 16,
+    backgroundColor: 'transparent',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  pickerItem: {
+    fontSize: 16,
+    color: '#4B3869',
+    fontWeight: 'bold',
   },
   button: {
     marginTop: 12,
