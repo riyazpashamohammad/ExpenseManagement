@@ -1,6 +1,6 @@
 // src/screens/LoginScreen.tsx
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { browserSessionPersistence, setPersistence, signInWithEmailAndPassword } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
@@ -20,6 +20,7 @@ export default function LoginScreen({ navigation }: any) {
 
   const handleLogin = async () => {
     try {
+      await setPersistence(auth, browserSessionPersistence);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       await AsyncStorage.setItem('authUser', JSON.stringify(userCredential.user));
   // navigation will be handled by useEffect after user state updates
