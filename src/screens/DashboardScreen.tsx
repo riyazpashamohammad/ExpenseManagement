@@ -52,16 +52,6 @@ export default function DashboardScreen({ navigation }: any) {
         >
           View Report
         </Button>
-        {appUser?.role === 'admin' && (
-          <Button
-            mode="contained"
-            icon="account"
-            style={[styles.button, { backgroundColor: theme.colors.primary, borderRadius: 16 }]}
-            onPress={() => navigation.navigate('UserManagement')}
-          >
-            Manage Users
-          </Button>
-        )}
       </View>
     </ImageBackground>
   );

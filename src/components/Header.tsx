@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { IconButton } from 'react-native-paper';
+import { Button, IconButton } from 'react-native-paper';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
 import { useNotification } from '../context/NotificationContext';
+import { useTheme } from '../theme/ThemeContext';
 
 interface HeaderProps {
   title?: string;
@@ -13,6 +14,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ title, navigation, routeName }) => {
   const { logout, appUser } = useAuth();
+  const theme = useTheme();
   const { unreadCount } = useNotification();
 
   const handleLogout = async () => {
@@ -45,6 +47,13 @@ const Header: React.FC<HeaderProps> = ({ title, navigation, routeName }) => {
           <Text style={styles.userText}>{appUser.firstName || appUser.email}</Text>
         )}
       </View>
+      
+              {appUser?.role === 'admin' && (
+                <IconButton
+                  icon="account-cog"
+                  onPress={() => navigation.navigate('UserManagement')}
+                />
+              )}
       {/* Notification and logout on the right */}
       <NotificationBell unreadCount={unreadCount} onPress={() => navigation && navigation.navigate('Notifications')} />
       <IconButton
@@ -87,7 +96,7 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginLeft: 0,
-  },
+  }
 });
 
 export default Header;

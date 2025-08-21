@@ -1,9 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
 import { auth, db } from '../services/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { AppUser } from '../types/user';
+import * as SecureStore  from 'expo-secure-store';
+import { se } from 'date-fns/locale';
 
 interface AuthContextType {
   user: User | null;
@@ -25,6 +27,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+
+    const loadUser = async() => {
+      try{
+      const storedUser = await AsyncStorage.getItem('authUser');
+      console.log("Stored User:", storedUser);
+      if (storedUser) {
+        const loggedInUser = JSON.parse(storedUser);
+        const password = await SecureStore.getItemAsync('password');
+        if(password){
+        await signInWithEmailAndPassword(auth, loggedInUser.email, password);
+        }
+      } 
+      }
+    catch (error) {
+      console.error("Error loading user:", error);
+    }
+    finally {
+      setLoading(false);
+    }
+    };
+    loadUser();
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
@@ -67,6 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     setAppUser(null);
     await AsyncStorage.removeItem('authUser');
+    await SecureStore.deleteItemAsync('password');
   };
 
   return (

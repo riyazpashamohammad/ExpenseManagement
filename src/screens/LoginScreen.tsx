@@ -8,6 +8,8 @@ import { useTheme } from '../theme/ThemeContext';
 import { ScreenBackground } from '../components/ScreenBackground';
 import { commonStyles } from '../theme/commonStyles';
 import { auth } from '../services/firebase';
+import * as SecureStore  from 'expo-secure-store';
+
 
 import { useAuth } from '../context/AuthContext';
 
@@ -20,8 +22,8 @@ export default function LoginScreen({ navigation }: any) {
 
   const handleLogin = async () => {
     try {
-      await setPersistence(auth, browserSessionPersistence);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await SecureStore.setItemAsync('password', password);
       await AsyncStorage.setItem('authUser', JSON.stringify(userCredential.user));
   // navigation will be handled by useEffect after user state updates
     } catch (error: any) {
