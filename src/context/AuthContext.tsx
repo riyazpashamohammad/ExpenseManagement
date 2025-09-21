@@ -5,12 +5,13 @@ import { auth, db } from '../services/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { AppUser } from '../types/user';
 import * as SecureStore  from 'expo-secure-store';
-import { se } from 'date-fns/locale';
+import { Platform } from 'react-native';
+import SplashScreen from '../screens/SplashScreen';
 
 interface AuthContextType {
-  user: User | null;
+  user: User | null | undefined;
   appUser: AppUser | null;
-  loading: boolean;
+  loading: boolean | true;
   logout: () => Promise<void>;
 }
 
@@ -22,7 +23,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null | undefined>(null);
   const [appUser, setAppUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,14 +31,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const loadUser = async() => {
       try{
+        setLoading(true);
       const storedUser = await AsyncStorage.getItem('authUser');
-      console.log("Stored User:", storedUser);
       if (storedUser) {
         const loggedInUser = JSON.parse(storedUser);
+        if(Platform.OS !== 'web') {
         const password = await SecureStore.getItemAsync('password');
         if(password){
         await signInWithEmailAndPassword(auth, loggedInUser.email, password);
         }
+      }
+      }
+      else{
+        setUser(undefined);
       } 
       }
     catch (error) {
@@ -49,6 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
     loadUser();
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setLoading(true);
       setUser(firebaseUser);
       if (firebaseUser) {
         await AsyncStorage.setItem('authUser', JSON.stringify(firebaseUser));
@@ -92,6 +99,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await AsyncStorage.removeItem('authUser');
     await SecureStore.deleteItemAsync('password');
   };
+
+  if (loading) {
+    return <SplashScreen />;
+  }
 
   return (
     <AuthContext.Provider value={{ user, appUser, loading, logout }}>

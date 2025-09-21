@@ -83,7 +83,7 @@ export function useExpenseReport() {
         const yearlyTotals: Record<string, number> = {};
         const categoryTotals: Record<string, number> = {};
         allExpenses.forEach((data) => {
-          const date = new Date(data.date);
+          const date = new Date(data.expenseDate);
           const dayKey = format(date, 'yyyy-MM-dd');
           const monthKey = format(date, 'yyyy-MM');
           const yearKey = format(date, 'yyyy');

@@ -5,6 +5,8 @@ import { Platform, Dimensions } from 'react-native';
 import { Card, Button, Text } from 'react-native-paper';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeContext';
+import SplashScreen from './SplashScreen';
+import { ScreenBackground } from '../components/ScreenBackground';
 
 
 export default function DashboardScreen({ navigation }: any) {
@@ -20,14 +22,10 @@ export default function DashboardScreen({ navigation }: any) {
       if (!appUser) navigation.replace('Login');
     }
   }, [appUser]);
-  if (checking) return null;
-  if (!appUser) return null;
+  if (checking) return <SplashScreen />;
+  if (!appUser) return <SplashScreen />;
   return (
-    <ImageBackground
-      source={theme.images.background}
-      style={{ width, height }}
-      resizeMode="stretch"
-    >
+    <ScreenBackground>
       <View style={[styles.container, { backgroundColor: 'transparent' }]}> 
         <Image source={theme.images.cuteDemon} style={styles.cuteImage} />
         <Text variant="titleLarge" style={[styles.title, { color: theme.colors.primary }]}>Expense Dashboard</Text>
@@ -53,7 +51,7 @@ export default function DashboardScreen({ navigation }: any) {
           View Report
         </Button>
       </View>
-    </ImageBackground>
+    </ScreenBackground>
   );
 }
 

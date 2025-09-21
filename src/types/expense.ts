@@ -7,5 +7,5 @@ export interface Expense {
   currency: string; // e.g. 'INR', 'USD'
   userId: string;
   comment?: string;
-  date: string;
+  expenseDate: string;
 }

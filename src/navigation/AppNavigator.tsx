@@ -10,16 +10,20 @@ import ReportScreen from '../screens/ReportScreen';
 import UserManagementScreen from '../screens/UserManagementScreen';
 import Header from '../components/Header';
 import NotificationsScreen from '../screens/NotificationsScreen';
+import { useAuth } from '../context/AuthContext';
 
 
 
 const Stack = createNativeStackNavigator();
 
+
+
 export default function AppNavigator() {
+  const { user, loading } = useAuth();
   return (
     <NavigationContainer>
-  <Stack.Navigator initialRouteName="Login">
-  <Stack.Screen name="Notifications" component={NotificationsScreen} options={({ navigation, route }) => ({ header: () => <Header navigation={navigation} routeName={route.name} /> })} />
+      <Stack.Navigator initialRouteName={user == undefined ? "Login" : "Dashboard"}>
+        <Stack.Screen name="Notifications" component={NotificationsScreen} options={({ navigation, route }) => ({ header: () => <Header navigation={navigation} routeName={route.name} /> })} />
         <Stack.Screen name="Login" component={LoginScreen} options={({ navigation, route }) => ({ header: () => <Header navigation={navigation} routeName={route.name} /> })} />
         <Stack.Screen name="Dashboard" component={DashboardScreen} options={({ navigation, route }) => ({ header: () => <Header navigation={navigation} routeName={route.name} /> })} />
         <Stack.Screen name="AddExpense" component={AddExpenseScreen} options={({ navigation, route }) => ({ header: () => <Header navigation={navigation} routeName={route.name} /> })} />
@@ -28,4 +32,5 @@ export default function AppNavigator() {
       </Stack.Navigator>
     </NavigationContainer>
   );
+
 }

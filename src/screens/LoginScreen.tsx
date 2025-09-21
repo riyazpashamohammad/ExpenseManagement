@@ -12,11 +12,14 @@ import * as SecureStore  from 'expo-secure-store';
 
 
 import { useAuth } from '../context/AuthContext';
+import SplashScreen from './SplashScreen';
 
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [localLoading, setLocalLoading] = useState(true);
+
   const theme = useTheme();
   const { user, loading } = useAuth();
 
@@ -34,7 +37,8 @@ export default function LoginScreen({ navigation }: any) {
 
   // If already logged in, redirect to Dashboard
   React.useEffect(() => {
-    if (!loading && user) {
+    if (user) {
+      setLocalLoading(false);
       // Prevent navigation loop if already on Dashboard
       if (navigation.getState && navigation.getState().routes) {
         const routes = navigation.getState().routes;
@@ -46,11 +50,13 @@ export default function LoginScreen({ navigation }: any) {
         navigation.replace('Dashboard');
       }
     }
+    if(user == undefined){
+      setLocalLoading(false);
+    }
   }, [user, loading]);
 
-  if (loading) {
-    // Optionally, show a splash/loading indicator here
-    return null;
+  if (loading || localLoading) {
+    return <SplashScreen />;
   }
 
   return (

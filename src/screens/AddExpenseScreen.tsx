@@ -2,6 +2,7 @@ import { useNotification } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 // src/screens/AddExpenseScreen.tsx
 import React from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { ActivityIndicator, Image, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { TextInput, Button, Snackbar, Text, HelperText } from 'react-native-paper';
 import { useAddExpense } from '../hooks/useAddExpense';
@@ -26,6 +27,8 @@ export default function AddExpenseScreen({ navigation }: any) {
     setGroupId,
     comment,
     setComment,
+    setExpenseDate,
+    expenseDate,
     loading,
     success,
     error,
@@ -34,6 +37,7 @@ export default function AddExpenseScreen({ navigation }: any) {
 
   // Emoji mood state
   const [selectedMood, setSelectedMood] = React.useState<string>('');
+  const [showDatePicker, setShowDatePicker] = React.useState(false);
   const moodEmojis = [
     { emoji: '😊', label: 'Happy' },
     { emoji: '😢', label: 'Sad' },
@@ -83,22 +87,38 @@ export default function AddExpenseScreen({ navigation }: any) {
           {moodEmojis.map((mood) => (
             <TouchableOpacity
               key={mood.emoji}
-              style={[
-                styles.moodEmojiTouchable,
-                selectedMood === mood.emoji && styles.selectedMoodEmojiTouchable,
-              ]}
+              style={[styles.moodEmojiTouchable, selectedMood === mood.emoji && styles.selectedMoodEmojiTouchable]}
               onPress={() => setSelectedMood(mood.emoji)}
               activeOpacity={0.7}
             >
-              <Text style={[
-                styles.moodEmojiText,
-                selectedMood === mood.emoji && styles.selectedMoodEmojiTextSelected,
-              ]}>
+              <Text style={[styles.moodEmojiText, selectedMood === mood.emoji && styles.selectedMoodEmojiTextSelected]}>
                 {mood.emoji}
               </Text>
               <Text style={styles.moodLabel}>{mood.label}</Text>
             </TouchableOpacity>
           ))}
+        </View>
+        {/* Date Picker Row */}
+        <View style={{ width: '100%', alignItems: 'center', marginBottom: 12 }}>
+          <TouchableOpacity
+            style={{ padding: 8, borderRadius: 8, backgroundColor: '#fff', borderWidth: 1, borderColor: theme.colors.primary, marginBottom: 4 }}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <Text style={{ color: theme.colors.primary, fontWeight: 'bold' }}>
+              {`Date: ${expenseDate}`}
+            </Text>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={new Date(expenseDate)}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+                if (selectedDate) setExpenseDate(selectedDate.toISOString());
+              }}
+            />
+          )}
         </View>
         <TextInput
           label="Title"

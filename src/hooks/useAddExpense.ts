@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { db, auth } from '../services/firebase';
 import { collection, addDoc } from 'firebase/firestore';
-import { AppUser, Group } from '../types/user';
 
 
 export interface SaveExpenseOptions {
@@ -18,6 +17,7 @@ export function useAddExpense() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [expenseDate, setExpenseDate] = useState(new Date().toISOString());
 
   const saveExpense = async (options?: SaveExpenseOptions) => {
     setLoading(true);
@@ -38,13 +38,17 @@ export function useAddExpense() {
         userId: user.uid,
         groupId: groupId || null,
         comment,
-        date: new Date().toISOString(),
+        expenseDate,
         mood: options?.mood || null,
       });
       setSuccess(true);
       setTitle('');
       setCategory('');
       setAmount('');
+      setExpenseDate(new Date().toISOString());
+      setCurrency('INR');
+      setGroupId('');
+      setComment('');
     } catch (e: any) {
       setError(e.message || 'Failed to save expense');
     } finally {
@@ -65,6 +69,8 @@ export function useAddExpense() {
     setGroupId,
     comment,
     setComment,
+    setExpenseDate,
+    expenseDate,
     loading,
     success,
     error,
