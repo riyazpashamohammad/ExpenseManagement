@@ -5,8 +5,9 @@ export const myDemonTheme = {
     primary: '#A084CA',
     accent: '#F7A8B8',
     text: '#4B3869',
-    border: '#E1BEE7',
-    icon: '#F7A8B8',
+  border: '#E1BEE7',
+  icon: '#F7A8B8',
+  error: '#E57373',
   },
   images: {
     cuteDemon: require('../../assets/mydemon/cute-demon.png'),

@@ -1,7 +1,7 @@
 import { useNotification } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 // src/screens/AddExpenseScreen.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { ActivityIndicator, Image, View, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { ScrollView } from 'react-native';
@@ -15,6 +15,8 @@ import { commonStyles } from '../theme/commonStyles';
 
 export default function AddExpenseScreen({ navigation }: any) {
   const { appUser } = useAuth();
+  const userGroups = (appUser?.groupIds || []).map((id: string) => ({ id, name: id }));
+  const groupLoading = !appUser;
   const {
     title,
     setTitle,
@@ -59,6 +61,11 @@ export default function AddExpenseScreen({ navigation }: any) {
     await saveExpense({ mood: selectedMood });
   };
 
+  // Set default groupId if only one group
+  useEffect(() => {
+    if (userGroups.length === 1) setGroupId(userGroups[0].id);
+  }, [userGroups, setGroupId]);
+
   React.useEffect(() => {
     if (success && pendingNotif) {
       setShowSuccess(true);
@@ -86,7 +93,15 @@ export default function AddExpenseScreen({ navigation }: any) {
         keyboardVerticalOffset={80}
       >
         <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
-          <View style={styles.mainContent}>
+          {appUser?.role === 'admin' && (
+            <TouchableOpacity
+              style={{ backgroundColor: '#b983ff', padding: 10, borderRadius: 8, marginBottom: 16, alignSelf: 'flex-end' }}
+              onPress={() => navigation.navigate('ExpenseList')}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>View/Edit All Expenses</Text>
+            </TouchableOpacity>
+          )}
+          <View style={styles.glassCard}>
             <Image source={theme.images.cuteDemon} style={commonStyles.cuteImage} />
             <Text variant="titleLarge" style={[commonStyles.title, { color: theme.colors.primary }]}>Add Expense</Text>
             {/* Mood Emoji Row */}
@@ -183,12 +198,29 @@ export default function AddExpenseScreen({ navigation }: any) {
                 <Picker.Item label="EUR (€)" value="EUR" />
               </Picker>
             </View>
-            {/* TODO: Add group selection UI here */}
+            {/* Group selection dropdown if user is in multiple groups */}
+            {groupLoading ? null : userGroups.length > 1 ? (
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  selectedValue={groupId}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                  dropdownIconColor={theme.colors.primary}
+                  onValueChange={(itemValue: string) => setGroupId(itemValue)}
+                >
+                  {userGroups.map(g => (
+                    <Picker.Item key={g.id} label={g.name} value={g.id} />
+                  ))}
+                </Picker>
+              </View>
+            ) : userGroups.length === 1 ? (
+              <Text style={{ marginBottom: 8, fontWeight: 'bold' }}>Group: {userGroups[0].name}</Text>
+            ) : null}
             <HelperText type="info">Enter the expense details above.</HelperText>
             <Button
               mode="contained"
               onPress={handleSaveExpense}
-              style={[commonStyles.button, { backgroundColor: theme.colors.primary, borderRadius: 16 }]}
+              style={[commonStyles.button, { backgroundColor: theme.colors.primary, borderRadius: 16, elevation: 4, shadowColor: theme.colors.primary }]}
               disabled={loading || !title || !category || !amount}
               icon="plus"
             >
@@ -219,14 +251,25 @@ export default function AddExpenseScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  mainContent: {
+  glassCard: {
     alignItems: 'center',
     justifyContent: 'flex-start',
     paddingBottom: 40,
     paddingTop: 8,
     width: '100%',
-    maxWidth: 350,
+    maxWidth: 370,
     alignSelf: 'center',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    borderRadius: 28,
+    marginBottom: 24,
+    elevation: 8,
+    borderWidth: 1.5,
+    borderColor: '#E0C3FC',
+    shadowColor: '#A084CA',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    paddingHorizontal: 12,
   },
   pickerWrapper: {
     marginBottom: 16,
@@ -256,21 +299,24 @@ const styles = StyleSheet.create({
   },
   moodRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'center',
     alignItems: 'flex-end',
     marginBottom: 16,
-    gap: 8,
+    width: '100%',
+    paddingHorizontal: 8,
+    gap: 4,
   },
   moodEmojiTouchable: {
     alignItems: 'center',
-    marginHorizontal: 6,
+    marginHorizontal: 4,
     padding: 4,
     borderRadius: 16,
     borderWidth: 2,
     borderColor: '#A084CA',
     backgroundColor: '#fff',
-    minWidth: 54,
-    minHeight: 64,
+    minWidth: 48,
+    minHeight: 56,
     elevation: 2,
     shadowColor: '#A084CA',
     shadowOffset: { width: 0, height: 2 },
@@ -285,7 +331,7 @@ const styles = StyleSheet.create({
     shadowColor: '#FFB300',
   },
   moodEmojiText: {
-    fontSize: 32,
+    fontSize: 28,
     textAlign: 'center',
     color: '#4B3869',
     marginBottom: 2,

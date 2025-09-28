@@ -55,9 +55,6 @@ export default function LoginScreen({ navigation }: any) {
     }
   }, [user, loading]);
 
-  if (loading || localLoading) {
-    return <SplashScreen />;
-  }
 
   return (
     <ScreenBackground>

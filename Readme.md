@@ -44,6 +44,7 @@ ExpenseTrackerTS is a cross-platform expense management app built with React Nat
 	```bash
 	eas update
 	# or use eas build for production builds
+	eas build --platform android --profile preview    for preview apk
 	```
 
 ## Project Structure

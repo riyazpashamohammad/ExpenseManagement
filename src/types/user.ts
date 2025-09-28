@@ -11,5 +11,6 @@ export interface AppUser {
   email: string;
   firstName?: string;
   role: UserRole;
+  loginMessage: string;
   groupIds: string[];
 }

@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
 import { auth, db } from '../services/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
 import { AppUser } from '../types/user';
 import * as SecureStore  from 'expo-secure-store';
 import { Platform } from 'react-native';
@@ -77,11 +77,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             firstName,
             role: 'user',
             groupIds: [],
+            loginMessage: ''
           };
           await setDoc(userRef, newUser);
           setAppUser(newUser);
         } else {
-          setAppUser(userSnap.data() as AppUser);
+          var userData = userSnap.data() as AppUser
+          if(userData.role === 'admin'){
+            const snap = await getDocs(collection(db, 'groups'));
+            const allGroups = snap.docs.map(doc => ({ id: doc.id, name: doc.data().name || doc.id, members: doc.data().members || [] }));
+            let userGroups = allGroups;
+            userData = { ...userData, groupIds: userGroups.map(g => g.id) };
+          }
+          setAppUser(userData);
         }
       } else {
         setAppUser(null);
@@ -97,12 +105,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     setAppUser(null);
     await AsyncStorage.removeItem('authUser');
+    if(Platform.OS !== 'web') {
     await SecureStore.deleteItemAsync('password');
+    }
   };
-
-  if (loading) {
-    return <SplashScreen />;
-  }
 
   return (
     <AuthContext.Provider value={{ user, appUser, loading, logout }}>

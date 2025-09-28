@@ -7,6 +7,7 @@ import { PaperProvider } from 'react-native-paper';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import { AuthProvider } from './src/context/AuthContext';
 import { NotificationProvider } from './src/context/NotificationContext';
+import { DeliveryProvider } from './src/context/DeliveryContext';
 
 export default function App() {
   return (
@@ -14,7 +15,9 @@ export default function App() {
       <ThemeProvider>
         <PaperProvider>
           <NotificationProvider>
-            <AppNavigator />
+            <DeliveryProvider>
+              <AppNavigator />
+            </DeliveryProvider>
           </NotificationProvider>
         </PaperProvider>
       </ThemeProvider>

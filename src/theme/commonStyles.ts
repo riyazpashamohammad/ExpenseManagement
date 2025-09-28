@@ -45,4 +45,26 @@ export const commonStyles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
+  
+  pickerWrapper: {
+    marginBottom: 16,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#A084CA',
+    width: '100%',
+    maxWidth: 350,
+    overflow: 'hidden',
+    alignSelf: 'center',
+    justifyContent: 'center',
+  },
+  picker: {
+    width: '100%',
+    color: '#4B3869',
+    fontSize: 16,
+    backgroundColor: 'transparent',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    alignSelf: 'center',
+  },
 });

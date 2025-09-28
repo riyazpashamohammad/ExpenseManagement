@@ -7,7 +7,7 @@ import { Expense } from '../types/expense';
 import { format } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
 
-export function useExpenseReport() {
+export function useExpenseReport(groupId: string | null = null) {
   const [daily, setDaily] = useState<Record<string, number>>({});
   const [monthly, setMonthly] = useState<Record<string, number>>({});
   const [yearly, setYearly] = useState<Record<string, number>>({});
@@ -19,63 +19,45 @@ export function useExpenseReport() {
 
 
   useEffect(() => {
+    if (!groupId) {
+      setLoading(true);
+      setDaily({});
+      setMonthly({});
+      setYearly({});
+      setCategory({});
+      setExpenses([]);
+      return;
+    }
     const fetchExpenses = async () => {
       setLoading(true);
       setError('');
       try {
         const user = auth.currentUser;
         if (!user || !appUser) throw new Error('User not logged in');
-        const isAdmin = appUser.role === 'admin' || user.email?.includes('admin');
         let allExpenses: Expense[] = [];
-        if (isAdmin) {
-          // Admin: all expenses
-          const snapshot = await getDocs(collection(db, 'expenses'));
-          snapshot.forEach((doc) => {
-            const data = doc.data() as Expense;
-            allExpenses.push({ ...data, id: doc.id });
-          });
+        let expSnap;
+        if (Array.isArray(groupId) && groupId.length > 0) {
+          expSnap = await getDocs(
+            query(collection(db, 'expenses'), where('groupId', 'in', groupId))
+          );
+        } else if (typeof groupId === 'string' && groupId) {
+          expSnap = await getDocs(
+            query(collection(db, 'expenses'), where('groupId', '==', groupId))
+          );
         } else {
-          // 1. Get all userIds in the groups the user is part of (from users collection)
-          let userIds = [user.uid];
-          if (appUser.groupIds && appUser.groupIds.length > 0) {
-            // Firestore 'array-contains-any' is limited to 10 items
-            const groupIdChunks = [];
-            for (let i = 0; i < appUser.groupIds.length; i += 10) {
-              groupIdChunks.push(appUser.groupIds.slice(i, i + 10));
-            }
-            let groupMembers = new Set<string>();
-            for (const chunk of groupIdChunks) {
-              const usersSnap = await getDocs(
-                query(collection(db, 'users'), where('groupIds', 'array-contains-any', chunk))
-              );
-              usersSnap.forEach((doc) => {
-                const data = doc.data();
-                if (data.id) groupMembers.add(data.id);
-              });
-            }
-            userIds = Array.from(new Set([user.uid, ...groupMembers]));
-          }
-          // 2. Query all expenses for these userIds (in batches of 10)
-          const userIdChunks = [];
-          for (let i = 0; i < userIds.length; i += 10) {
-            userIdChunks.push(userIds.slice(i, i + 10));
-          }
-          for (const chunk of userIdChunks) {
-            const expSnap = await getDocs(
-              query(collection(db, 'expenses'), where('userId', 'in', chunk))
-            );
-            expSnap.forEach((doc) => {
-              const data = doc.data() as Expense;
-              allExpenses.push({ ...data, id: doc.id });
-            });
-          }
-          // Deduplicate by expense id
-          const allMap = new Map<string, Expense>();
-          allExpenses.forEach(exp => {
-            if (exp.id) allMap.set(exp.id, exp);
-          });
-          allExpenses = Array.from(allMap.values());
+          setLoading(false);
+          return;
         }
+        expSnap.forEach((doc) => {
+          const data = doc.data() as Expense;
+          allExpenses.push({ ...data, id: doc.id });
+        });
+        // Deduplicate by expense id
+        const allMap = new Map<string, Expense>();
+        allExpenses.forEach(exp => {
+          if (exp.id) allMap.set(exp.id, exp);
+        });
+        allExpenses = Array.from(allMap.values());
 
         // Calculate totals
         const dailyTotals: Record<string, number> = {};
@@ -104,7 +86,7 @@ export function useExpenseReport() {
       }
     };
     fetchExpenses();
-  }, [appUser]);
+  }, [appUser, groupId]);
 
   return { daily, monthly, yearly, category, expenses, loading, error };
 }
