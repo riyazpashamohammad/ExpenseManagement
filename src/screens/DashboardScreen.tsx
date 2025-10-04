@@ -23,7 +23,7 @@ export default function DashboardScreen({ navigation }: any) {
     }
   }, [appUser]);
 
-  // Fetch expense stats in parallel, do not block UI
+ 
   const { total, month, loading } = useExpensesStats(appUser?.groupIds);
 
   return (

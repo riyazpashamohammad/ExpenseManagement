@@ -20,10 +20,10 @@ export function useExpensesStats(groupIds?: string[]) {
         let q: Query<DocumentData> | CollectionReference<DocumentData> = colRef;
         if (groupIds && groupIds.length > 0) {
           // Firestore supports 'in' for up to 10 values
-          q = query(colRef, where('groupId', 'in', groupIds.slice(0, 10)));
+          q = query(colRef, where('groupId', 'in', groupIds.slice(0, 10)));         
+          const snap = await getDocs(q);
+          expenses = snap.docs.map(doc => doc.data() as Expense);
         }
-        const snap = await getDocs(q);
-        expenses = snap.docs.map(doc => doc.data() as Expense);
       } catch (e) {
         setTotal(0);
         setMonth(0);

@@ -244,7 +244,7 @@ export default function ReportScreen({ navigation }: any) {
         <Text style={[commonStyles.title, { color: '#b983ff', letterSpacing: 1 }]}>Expense Report</Text>
         {groupLoading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginBottom: 16 }} />
-        ) : groups.length > 0 ? (
+        ) : groups.length > 1 ? (
           <View style={commonStyles.pickerWrapper}>
             <Picker
               selectedValue={selectedGroupId}
@@ -256,7 +256,10 @@ export default function ReportScreen({ navigation }: any) {
               ))}
             </Picker>
           </View>
-        ) : (
+        ) : groups.length === 1 ? (
+              <Text style={{ marginBottom: 8, fontWeight: 'bold', display: 'none' }}>Group: {groups[0].name}</Text>
+            ):
+            (
           <Text style={{ color: theme.colors.error, marginBottom: 12 }}>No groups found.</Text>
         )}
         <View style={styles.tabBar}>

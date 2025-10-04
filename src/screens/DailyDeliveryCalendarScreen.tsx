@@ -17,7 +17,7 @@ const DailyDeliveryCalendarScreen = () => {
   const { appUser } = useAuth();
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [groups, setGroups] = useState<{ id: string, name: string, members: string[] }[]>([]);
+  const [groups, setGroups] = useState<{ id: string, name: string}[]>([]);
   const [groupLoading, setGroupLoading] = useState(true);
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
 
@@ -27,7 +27,7 @@ const DailyDeliveryCalendarScreen = () => {
       setGroupLoading(true);
       if (!appUser) return;
       
-      setGroups(appUser.groupIds ? appUser.groupIds.map(gid => ({ id: gid, name: gid, members: [] })) : []);
+      setGroups(appUser.groupIds ? appUser.groupIds.map(gid => ({ id: gid, name: gid})) : []);
       if (appUser.groupIds.length > 0) setSelectedGroupId(appUser.groupIds[0]);
       setGroupLoading(false);
     };
@@ -63,7 +63,7 @@ const DailyDeliveryCalendarScreen = () => {
         <Text style={styles.title}>Delivery Calendar</Text>
         {groupLoading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginBottom: 16 }} />
-        ) : groups.length > 0 ? (
+        ) : groups.length > 1 ? (
           <View style={styles.pickerWrapper}>
             <Picker
               selectedValue={selectedGroupId}
@@ -75,6 +75,8 @@ const DailyDeliveryCalendarScreen = () => {
               ))}
             </Picker>
           </View>
+        ) : groups.length === 1 ? (
+          <Text style={{ marginBottom: 8, fontWeight: 'bold', display: 'none' }}>Group: {groups[0].name}</Text>
         ) : (
           <Text style={{ color: theme.colors.error, marginBottom: 12 }}>No groups found.</Text>
         )}
