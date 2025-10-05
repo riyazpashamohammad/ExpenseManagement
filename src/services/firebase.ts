@@ -2,15 +2,16 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { API_KEY, AUTH_DOMAIN, PROJECT_ID, STORAGE_BUCKET, MESSAGING_SENDER_ID, APP_ID, MEASUREMENT_ID } from 'expo-env';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCM9Xm_Dfow5CH7Vj_Wqph1C_Uq-nw5zE4",
-  authDomain: "expensemanagement-6c990.firebaseapp.com",
-  projectId: "expensemanagement-6c990",
-  storageBucket: "expensemanagement-6c990.firebasestorage.app",
-  messagingSenderId: "320693337345",
-  appId: "1:320693337345:web:9f8a1fc7b46ed0f17aaf00",
-  measurementId: "G-LN62PC2LXC"
+  apiKey: API_KEY,
+  authDomain: AUTH_DOMAIN,
+  projectId: PROJECT_ID,
+  storageBucket: STORAGE_BUCKET,
+  messagingSenderId: MESSAGING_SENDER_ID,
+  appId: APP_ID,
+  measurementId: MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
