@@ -59,8 +59,42 @@ ExpenseTrackerTS is a cross-platform expense management app built with React Nat
 	 - `theme/` - Theme and styles
 	 - `types/` - TypeScript types
 
-## Firebase Setup
-Update `src/services/firebase.ts` with your Firebase config if deploying your own instance.
+## Environment Variable Setup
+
+### Local Development
+1. Create a `.env` file in the project root with your Firebase config:
+	 ```env
+	 API_KEY=your_local_api_key
+	 AUTH_DOMAIN=your_local_auth_domain
+	 PROJECT_ID=your_local_project_id
+	 STORAGE_BUCKET=your_local_storage_bucket
+	 MESSAGING_SENDER_ID=your_local_messaging_sender_id
+	 APP_ID=your_local_app_id
+	 MEASUREMENT_ID=your_local_measurement_id
+	 ```
+2. Make sure `.env` is listed in `.gitignore` so secrets are not committed.
+3. Use a package like `react-native-dotenv` to access these variables in development, or rely on EAS Build for production.
+
+### Production (EAS Build)
+1. In `eas.json`, add your environment variables under the `env` key for your build profile:
+	 ```json
+	 {
+		 "build": {
+			 "production": {
+				 "env": {
+					 "API_KEY": "your_production_api_key",
+					 "AUTH_DOMAIN": "your_production_auth_domain",
+					 "PROJECT_ID": "your_production_project_id",
+					 "STORAGE_BUCKET": "your_production_storage_bucket",
+					 "MESSAGING_SENDER_ID": "your_production_messaging_sender_id",
+					 "APP_ID": "your_production_app_id",
+					 "MEASUREMENT_ID": "your_production_measurement_id"
+				 }
+			 }
+		 }
+	 }
+	 ```
+2. EAS Build will inject these variables at build time and you can access them via `process.env` in your code.
 
 ## Contributing
 Pull requests and issues are welcome!
